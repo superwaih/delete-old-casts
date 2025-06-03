@@ -1,7 +1,7 @@
 {
   "frame": {
     "version": "1",
-    "name": "Yoink!",
+    "name": "Delete Old Casts",
     "iconUrl": "https://delete-old-casts.vercel.app/logo.png",
     "homeUrl": "https://delete-old-casts.vercel.app",
     "imageUrl": "https://delete-old-casts.vercel.app/og.png",
@@ -9,10 +9,6 @@
     "splashImageUrl": "https://delete-old-casts.vercel.app/logo.png",
     "splashBackgroundColor": "#000000",
     "requiredChains": ["eip155:8453"],
-    "requiredCapabilities": [
-      "actions.signIn",
-      "wallet.getEthereumProvider"
-     
-    ]
+    "requiredCapabilities": ["actions.signIn", "wallet.getEthereumProvider"]
   }
 }
