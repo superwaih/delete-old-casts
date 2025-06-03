@@ -10,7 +10,7 @@ type User = {
   pfpUrl?: string;
 } | null;
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 const formatDateTime = (timestamp: number) => {
   const date = new Date(timestamp * 1000);
