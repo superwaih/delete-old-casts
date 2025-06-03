@@ -39,7 +39,7 @@ const UserCast = ({ user }: { user: User }) => {
   };
 
   return (
-    <section className="w-full max-w-2xl mx-auto mt-8">
+    <section className="w-full max-w-2xl mx-auto mt-8 pb-20">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">
         {user?.displayName || user?.username || "User"}'s Casts
       </h2>
@@ -109,6 +109,28 @@ const UserCast = ({ user }: { user: User }) => {
         </div>
       ) : (
         <div className="text-gray-500 text-sm">No casts found.</div>
+      )}
+
+      {/* Floating Delete Bar */}
+      {selectedCasts.length > 0 && (
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md z-50">
+          <div className="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
+            <span className="text-sm text-gray-700">
+              {selectedCasts.length} cast
+              {selectedCasts.length > 1 ? "s" : ""} selected
+            </span>
+            <button
+              onClick={() => {
+                // Placeholder for actual deletion logic
+                alert(`Deleting ${selectedCasts.length} casts`);
+                setSelectedCasts([]);
+              }}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+            >
+              Delete Selected
+            </button>
+          </div>
+        </div>
       )}
     </section>
   );
