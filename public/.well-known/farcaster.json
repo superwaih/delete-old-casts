@@ -3,16 +3,16 @@
     "version": "1",
     "name": "Yoink!",
     "iconUrl": "https://delete-old-casts.vercel.app/logo.png",
-    "homeUrl": "https://yoink.party/framesV2/",
-    "imageUrl": "https://yoink.party/framesV2/opengraph-image",
+    "homeUrl": "https://delete-old-casts.vercel.app",
+    "imageUrl": "https://delete-old-casts.vercel.app/og.png",
     "buttonTitle": "🚩 Start",
-    "splashImageUrl": "https://yoink.party/logo.png",
-    "splashBackgroundColor": "#ffffff",
+    "splashImageUrl": "https://delete-old-casts.vercel.app/logo.png",
+    "splashBackgroundColor": "#000000",
     "requiredChains": ["eip155:8453"],
     "requiredCapabilities": [
       "actions.signIn",
-      "wallet.getEthereumProvider",
-      "actions.swapToken"
+      "wallet.getEthereumProvider"
+     
     ]
   }
 }
