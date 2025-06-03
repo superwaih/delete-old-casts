@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { sdk } from "@farcaster/frame-sdk";
 import UserHeader from "@/components/user-header";
+import UserCast from "@/components/user-cast";
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -58,7 +59,10 @@ export default function Home() {
     <main className="min-h-screen bg-gray-50 text-black  p-6">
       {isInMiniApp ? (
         user ? (
-          <UserHeader user={user} />
+          <>
+            <UserHeader user={user} />
+            <UserCast user={user} />
+          </>
         ) : (
           <div className="text-lg text-gray-700">Prompting sign-in...</div>
         )
