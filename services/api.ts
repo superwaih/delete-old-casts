@@ -19,7 +19,7 @@ const PORTAL_BASEURL = 'https://api.neynar.com/v2'
     baseURL: BASEURL,
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': NEYNAR_API_KEY
+      'x-api-key': 'NEYNAR_API_DOCS'
     },
   });
   
