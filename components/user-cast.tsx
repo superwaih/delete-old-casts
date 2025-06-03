@@ -1,6 +1,7 @@
 import React from "react";
 import { useFetchUserCast } from "@/services/neynar";
 import { CastMessage } from "@/types";
+import { useNeynarContext } from "@neynar/react";
 
 type User = {
   fid: number;
@@ -11,7 +12,8 @@ type User = {
 
 const UserCast = ({ user }: { user: User }) => {
   const { data, isLoading } = useFetchUserCast(user?.fid ?? 0);
-
+  const { user: userData } = useNeynarContext();
+  console.log("UserCast data:", userData)
   return (
     <section className="w-full max-w-2xl mx-auto mt-8">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">
