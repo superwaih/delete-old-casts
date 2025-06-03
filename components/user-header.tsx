@@ -27,7 +27,7 @@ export default function UserHeader({ user }: UserHeaderProps) {
           Welcome, {user.displayName || user.username || "User"}
         </h1>
         <div className=" text-gray-600 font-poppins">
-          {/* <p>FID: {user.fid}</p> */}
+          <p>FID: {user.fid}</p>
           {user.username && <p>Username: {user.username}</p>}
           {user.displayName && <p>Display Name: {user.displayName}</p>}
         </div>
