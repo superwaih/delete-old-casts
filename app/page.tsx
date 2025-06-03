@@ -19,5 +19,5 @@ export default function Home() {
     }
   }, [isLoaded]);
 
-  return <main>{isInMiniApp ? <div>Min app hehehehdsiudsiusdiu</div> : <div>Not welcome here</div>}</main>;
+  return <main className="text-black">{isInMiniApp ? <div>Min app hehehehdsiudsiusdiu</div> : <div>Not welcome here</div>}</main>;
 }
