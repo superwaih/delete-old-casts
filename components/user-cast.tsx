@@ -9,8 +9,6 @@ type User = {
   pfpUrl?: string;
 } | null;
 
-
-
 const UserCast = ({ user }: { user: User }) => {
   const { data, isLoading } = useFetchUserCast(user?.fid ?? 0);
 
@@ -34,23 +32,26 @@ const UserCast = ({ user }: { user: User }) => {
         </div>
       ) : (
         <div className="space-y-4">
-        { (data?.messages?.length ?? 0) > 0 ? (
-            data?.messages!.map((msg: CastMessage) => (
-              <div
-                key={msg.hash}
-                className="bg-white p-4 border border-gray-200 rounded-lg shadow-sm"
-              >
-                <p className="text-gray-700 whitespace-pre-wrap">
-                  {msg.data.castAddBody.text}
-                </p>
-                {msg.data.castAddBody.parentCastId && (
-                  <p className="mt-2 text-sm text-gray-400">
-                    Replying to cast by FID{" "}
-                    {msg.data.castAddBody.parentCastId.fid}
-                  </p>
-                )}
-              </div>
-            ))
+          {(data?.messages?.length ?? 0) > 0 ? (
+            data?.messages!.map(
+              (msg: CastMessage) =>
+                msg?.data?.castAddBody ? (
+                  <div
+                    key={msg.hash}
+                    className="bg-white p-4 border border-gray-200 rounded-lg shadow-sm"
+                  >
+                    <p className="text-gray-700 whitespace-pre-wrap">
+                      {msg.data.castAddBody.text}
+                    </p>
+                    {msg.data.castAddBody.parentCastId && (
+                      <p className="mt-2 text-sm text-gray-400">
+                        Replying to cast by FID{" "}
+                        {msg.data.castAddBody.parentCastId.fid}
+                      </p>
+                    )}
+                  </div>
+                ) : null // Skip messages without castAddBody
+            )
           ) : (
             <div className="text-gray-500 text-sm">No casts found.</div>
           )}

@@ -11,6 +11,8 @@
   "dependencies": {
     "@farcaster/frame-sdk": "^0.0.54",
     "@farcaster/frame-wagmi-connector": "^0.0.43",
+    "@neynar/nodejs-sdk": "^2.44.0",
+    "@neynar/react": "^1.2.0",
     "@tanstack/react-query": "^5.80.0",
     "axios": "^1.9.0",
     "next": "15.3.3",
