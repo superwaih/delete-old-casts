@@ -5,9 +5,12 @@ import { sdk } from "@farcaster/frame-sdk";
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInMiniApp, setIsInMiniApp] = useState(false);
-  const [fid, setFid] = useState<number | null>(null);
-  const [client, setClient] = useState();
-
+  const [user, setUser] = useState<{
+    fid: number;
+    username?: string;
+    displayName?: string;
+    pfpUrl?: string;
+  } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -19,17 +22,20 @@ export default function Home() {
 
       if (result) {
         try {
-          const nclient = (await sdk.context).client
-          // setClient(nclient);
-          console.log("Client:", nclient);
-          const user = (await sdk.context).client.clientFid
-         
-          if (user ) {
-            setFid(user);
-            console.log("User FID:", user);
+          const context = await sdk.context;
+          const userData = context.user; // Access the user object from context
+          console.log("User Data:", userData);
+
+          if (userData && userData.fid) {
+            setUser({
+              fid: userData.fid,
+              username: userData.username,
+              displayName: userData.displayName,
+              pfpUrl: userData.pfpUrl,
+            });
           } else {
             await sdk.actions.signIn({
-              nonce: 'dsjshjdsiuWHRHHRH',
+              nonce: "dsjshjdsiuWHRHHRH",
               acceptAuthAddress: true,
             });
           }
@@ -51,13 +57,27 @@ export default function Home() {
   return (
     <main className="text-black">
       {isInMiniApp ? (
-        fid ? (
-          <div>Welcome, user with FID: {fid}</div>
+        user ? (
+          <div className="flex flex-col items-center gap-4 p-4">
+            <h1 className="text-2xl font-bold">
+              Welcome, {user.displayName || user.username || "User"}
+            </h1>
+            {user.pfpUrl && (
+              <img
+                src={user.pfpUrl}
+                alt="Profile Picture"
+                className="w-24 h-24 rounded-full object-cover"
+              />
+            )}
+            <p>FID: {user.fid}</p>
+            {user.username && <p>Username: {user.username}</p>}
+            {user.displayName && <p>Display Name: {user.displayName}</p>}
+          </div>
         ) : (
-          <div>Prompting sign-in...</div>
+          <div className="p-4">Prompting sign-in...</div>
         )
       ) : (
-        <div>Not welcome here</div>
+        <div className="p-4">Not welcome here</div>
       )}
     </main>
   );
