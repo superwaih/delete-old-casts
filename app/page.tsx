@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { sdk } from "@farcaster/frame-sdk";
 import UserHeader from "@/components/user-header";
 import UserCast from "@/components/user-cast";
-
+import { NeynarAuthButton } from "@neynar/react";
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInMiniApp, setIsInMiniApp] = useState(false);
@@ -57,6 +57,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50 text-black  p-6">
+      <NeynarAuthButton />
       {isInMiniApp ? (
         user ? (
           <>

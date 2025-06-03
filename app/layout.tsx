@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
+import { NeynarContextProvider, Theme } from "@neynar/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,14 +32,22 @@ export default function RootLayout({
           content='{"version":"next","imageUrl":"https://yoink.party/framesV2/opengraph-image","button":{"title":"🚩 Start","action":{"type":"launch_frame","name":"Yoink!","url":"https://yoink.party/framesV2","splashImageUrl":"https://yoink.party/logo.png","splashBackgroundColor":"#f5f0ec"}}}'
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      <NeynarContextProvider
+        settings={{
+          clientId: "032eef08-f408-40f5-91ff-bf0af86a8986",
+          defaultTheme: Theme.Light,
+          eventsCallbacks: {
+            onAuthSuccess: () => {},
+            onSignout() {},
+          },
+        }}
       >
-        <Providers>
-
-        {children}
-        </Providers>
-      </body>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <Providers>{children}</Providers>
+        </body>
+      </NeynarContextProvider>
     </html>
   );
 }
