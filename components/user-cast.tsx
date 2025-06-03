@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useDeleteCast, useFetchUserCast } from "@/services/neynar";
 import { useNeynarContext } from "@neynar/react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 type User = {
   fid: number;
@@ -37,22 +38,22 @@ const UserCast = ({ user }: { user: User }) => {
       prev.includes(hash) ? prev.filter((h) => h !== hash) : [...prev, hash]
     );
   };
-  const {mutate: deleteCast} = useDeleteCast()
+  const { mutate: deleteCast, isPending } = useDeleteCast();
 
-  const handleDelete = () =>{
+  const handleDelete = () => {
     if (selectedCasts.length === 0) return;
-   deleteCast(selectedCasts[0], {
-    onSuccess: (res) =>{
-        toast.success('Cast Deleted Success')
-        console.log(res)
-        setSelectedCasts([])
-    },
-    onError: (res) =>{
-toast.error(res.message)
-console.log(res)
-    }
-   })
-  }
+    deleteCast(selectedCasts[0], {
+      onSuccess: (res) => {
+        toast.success("Cast Deleted Success");
+        console.log(res);
+        setSelectedCasts([]);
+      },
+      onError: (res) => {
+        toast.error(res.message);
+        console.log(res);
+      },
+    });
+  };
   return (
     <section className="w-full max-w-2xl mx-auto mt-8 pb-20">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">
@@ -139,11 +140,15 @@ console.log(res)
                 // Placeholder for actual deletion logic
                 alert(`Deleting ${selectedCasts.length} casts`);
                 // setSelectedCasts([]);
-                handleDelete()
+                handleDelete();
               }}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+              className="bg-red-600 text-white flex justify-center items-center px-4 py-2 rounded hover:bg-red-700 transition"
             >
-              Delete Selected
+              {isPending ? (
+                <Loader2 className="animate-spin text-purple-400" />
+              ) : (
+                <span>Delete Selected</span>
+              )}
             </button>
           </div>
         </div>
