@@ -14,6 +14,15 @@ export const api = axios.create({
     },
   });
 
+const PORTAL_BASEURL = 'https://api.neynar.com/v2'
+  export const portalapi = axios.create({
+    baseURL: BASEURL,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': NEYNAR_API_KEY
+    },
+  });
+  
 //   api.interceptors.request.use(
 //     async (config) => {
 //       const AUTHENTICATION_TOKEN = getToken();
