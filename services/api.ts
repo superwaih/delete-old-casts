@@ -1,5 +1,5 @@
 
-const NEYNAR_API_KEY = 'EAAF4A38-195B-48CD-9E0A-1E017A0AC351'
+const NEYNAR_API_KEY = 'AD46BA8E-E6EE-4628-BE42-54E07EA838C8'
 const BASEURL =`https://hub-api.neynar.com/v1`
 
 import axios from 'axios';

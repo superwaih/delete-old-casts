@@ -18,6 +18,8 @@ export default function Home() {
   useEffect(() => {
     const load = async () => {
       await sdk.actions.ready();
+      const userid = await getFidCreationDate(963380);
+      console.log(userid, "userdid");
       setIsLoaded(true);
       const result = await sdk.isInMiniApp();
       setIsInMiniApp(result);
@@ -54,7 +56,7 @@ export default function Home() {
       load();
     }
   }, [isLoaded]);
-// const userid = getFidCreationDate()
+
   return (
     <main className="min-h-screen bg-gray-50 text-black  p-6">
       {/* <NeynarAuthButton /> */}
