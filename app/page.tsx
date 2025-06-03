@@ -18,8 +18,6 @@ export default function Home() {
   useEffect(() => {
     const load = async () => {
       await sdk.actions.ready();
-      const userid = await getFidCreationDate(963380);
-      console.log(userid, "userdid");
       setIsLoaded(true);
       const result = await sdk.isInMiniApp();
       setIsInMiniApp(result);
