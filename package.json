@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@farcaster/frame-sdk": "^0.0.54",
+    "@farcaster/frame-wagmi-connector": "^0.0.43",
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
