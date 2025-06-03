@@ -6,6 +6,8 @@ export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInMiniApp, setIsInMiniApp] = useState(false);
   const [fid, setFid] = useState<number | null>(null);
+  const [client, setClient] = useState();
+
 
   useEffect(() => {
     const load = async () => {
@@ -17,7 +19,11 @@ export default function Home() {
 
       if (result) {
         try {
-          const user = await (await sdk.context).client.clientFid
+          const nclient = (await sdk.context).client
+          // setClient(nclient);
+          console.log("Client:", nclient);
+          const user = (await sdk.context).client.clientFid
+         
           if (user ) {
             setFid(user);
             console.log("User FID:", user);
