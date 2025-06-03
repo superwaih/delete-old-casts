@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFetchUserCast } from "@/services/neynar";
 import { CastMessage } from "@/types";
 import { useNeynarContext } from "@neynar/react";
@@ -10,10 +10,34 @@ type User = {
   pfpUrl?: string;
 } | null;
 
+const ITEMS_PER_PAGE = 5;
+
+const formatDateTime = (timestamp: number) => {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleString();
+};
+
 const UserCast = ({ user }: { user: User }) => {
   const { data, isLoading } = useFetchUserCast(user?.fid ?? 0);
   const { user: userData } = useNeynarContext();
-  console.log("UserCast data:", userData)
+  const [selectedCasts, setSelectedCasts] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const messages =
+    data?.messages?.filter((msg) => msg?.data?.castAddBody) ?? [];
+
+  const totalPages = Math.ceil(messages.length / ITEMS_PER_PAGE);
+  const paginatedMessages = messages.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const toggleSelection = (hash: string) => {
+    setSelectedCasts((prev) =>
+      prev.includes(hash) ? prev.filter((h) => h !== hash) : [...prev, hash]
+    );
+  };
+
   return (
     <section className="w-full max-w-2xl mx-auto mt-8">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">
@@ -32,32 +56,59 @@ const UserCast = ({ user }: { user: User }) => {
             </div>
           ))}
         </div>
-      ) : (
+      ) : messages.length > 0 ? (
         <div className="space-y-4">
-          {(data?.messages?.length ?? 0) > 0 ? (
-            data?.messages!.map(
-              (msg: CastMessage) =>
-                msg?.data?.castAddBody ? (
-                  <div
-                    key={msg.hash}
-                    className="bg-white p-4 border border-gray-200 rounded-lg shadow-sm"
-                  >
-                    <p className="text-gray-700 whitespace-pre-wrap">
-                      {msg.data.castAddBody.text}
-                    </p>
-                    {msg.data.castAddBody.parentCastId && (
-                      <p className="mt-2 text-sm text-gray-400">
-                        Replying to cast by FID{" "}
-                        {msg.data.castAddBody.parentCastId.fid}
-                      </p>
-                    )}
-                  </div>
-                ) : null // Skip messages without castAddBody
-            )
-          ) : (
-            <div className="text-gray-500 text-sm">No casts found.</div>
-          )}
+          {paginatedMessages.map((msg) => (
+            <div
+              key={msg.hash}
+              className="bg-white p-4 border border-gray-200 rounded-lg shadow-sm flex items-start gap-2"
+            >
+              <input
+                type="checkbox"
+                checked={selectedCasts.includes(msg.hash)}
+                onChange={() => toggleSelection(msg.hash)}
+                className="mt-1"
+              />
+              <div className="flex-1">
+                <p className="text-gray-700 whitespace-pre-wrap">
+                  {msg.data.castAddBody.text}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Posted on: {formatDateTime(msg.data.timestamp)}
+                </p>
+                {msg.data.castAddBody.parentCastId && (
+                  <p className="mt-1 text-sm text-gray-400">
+                    Replying to cast by FID{" "}
+                    {msg.data.castAddBody.parentCastId.fid}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* Pagination Controls */}
+          <div className="flex justify-between items-center mt-6">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+              className="px-4 py-2 bg-gray-100 rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+              className="px-4 py-2 bg-gray-100 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
+      ) : (
+        <div className="text-gray-500 text-sm">No casts found.</div>
       )}
     </section>
   );
