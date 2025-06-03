@@ -1,6 +1,8 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { sdk } from "@farcaster/frame-sdk";
+import UserHeader from "@/components/user-header";
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -18,13 +20,11 @@ export default function Home() {
       setIsLoaded(true);
       const result = await sdk.isInMiniApp();
       setIsInMiniApp(result);
-      console.log("sdk", result);
 
       if (result) {
         try {
           const context = await sdk.context;
-          const userData = context.user; // Access the user object from context
-          console.log("User Data:", userData);
+          const userData = context.user;
 
           if (userData && userData.fid) {
             setUser({
@@ -55,29 +55,15 @@ export default function Home() {
   }, [isLoaded]);
 
   return (
-    <main className="text-black">
+    <main className="min-h-screen bg-gray-50 text-black flex items-center justify-center p-6">
       {isInMiniApp ? (
         user ? (
-          <div className="flex flex-col items-center gap-4 p-4">
-            <h1 className="text-2xl font-bold">
-              Welcome, {user.displayName || user.username || "User"}
-            </h1>
-            {user.pfpUrl && (
-              <img
-                src={user.pfpUrl}
-                alt="Profile Picture"
-                className="w-24 h-24 rounded-full object-cover"
-              />
-            )}
-            <p>FID: {user.fid}</p>
-            {user.username && <p>Username: {user.username}</p>}
-            {user.displayName && <p>Display Name: {user.displayName}</p>}
-          </div>
+          <UserHeader user={user} />
         ) : (
-          <div className="p-4">Prompting sign-in...</div>
+          <div className="text-lg text-gray-700">Prompting sign-in...</div>
         )
       ) : (
-        <div className="p-4">Not welcome here</div>
+        <div className="text-lg text-red-500">Not welcome here</div>
       )}
     </main>
   );
