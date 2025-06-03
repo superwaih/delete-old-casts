@@ -55,7 +55,7 @@ export default function Home() {
   }, [isLoaded]);
 
   return (
-    <main className="min-h-screen bg-gray-50 text-black flex items-center justify-center p-6">
+    <main className="min-h-screen bg-gray-50 text-black  p-6">
       {isInMiniApp ? (
         user ? (
           <UserHeader user={user} />

@@ -23,11 +23,11 @@ export default function UserHeader({ user }: UserHeaderProps) {
         />
       )}
       <div>
-        <h1 className="text-2xl font-semibold text-gray-800">
+        <h1 className="text-xl font-poppins font-semibold text-gray-800">
           Welcome, {user.displayName || user.username || "User"}
         </h1>
-        <div className="mt-2 text-gray-600">
-          <p>FID: {user.fid}</p>
+        <div className=" text-gray-600 font-poppins">
+          {/* <p>FID: {user.fid}</p> */}
           {user.username && <p>Username: {user.username}</p>}
           {user.displayName && <p>Display Name: {user.displayName}</p>}
         </div>
