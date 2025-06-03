@@ -8,7 +8,11 @@ export async function getFidCreationDate(fid: number): Promise<Date> {
     'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)'
   ]);
 
-  const topic = iface.getEventTopic('Transfer');
+  const transferEvent = iface.getEvent('Transfer');
+  if (!transferEvent) {
+    throw new Error("Transfer event not found in interface");
+  }
+  const topic = transferEvent.topicHash;
 
   const logs = await provider.getLogs({
     address: idRegistryAddress,
@@ -16,9 +20,9 @@ export async function getFidCreationDate(fid: number): Promise<Date> {
     toBlock: 'latest',
     topics: [
       topic,
-      ethers.ZeroHash, // from = 0x0 => mint
+      ethers.zeroPadValue('0x0000000000000000000000000000000000000000', 32), // from = 0x0
       null,
-      ethers.hexZeroPad(ethers.toBeHex(fid), 32)
+      ethers.zeroPadValue(ethers.toBeHex(fid), 32)
     ]
   });
 
@@ -27,5 +31,7 @@ export async function getFidCreationDate(fid: number): Promise<Date> {
   }
 
   const block = await provider.getBlock(logs[0].blockNumber);
-  return new Date(block.timestamp * 1000);
+  if (!block) throw new Error('Block not found');
+
+  return new Date(Number(block.timestamp) * 1000);
 }
