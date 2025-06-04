@@ -1,5 +1,6 @@
+import type React from "react";
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google"; // changed import
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
 import { Toaster } from "sonner";
@@ -7,7 +8,7 @@ import { Toaster } from "sonner";
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"], // optional: specify weights you need
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -23,15 +24,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* <meta
+        <meta
           name="fc:frame"
-          content='{"version":"next","imageUrl":"https://yoink.party/framesV2/opengraph-image","button":{"title":"🚩 Start","action":{"type":"launch_frame","name":"Yoink!","url":"https://yoink.party/framesV2","splashImageUrl":"https://yoink.party/logo.png","splashBackgroundColor":"#f5f0ec"}}}'
-        /> */}
+          content='{"frame":{"version":"1","name":"Delete Old Casts","iconUrl":"https://delete-old-casts.vercel.app/logo.png","homeUrl":"https://delete-old-casts.vercel.app","imageUrl":"https://delete-old-casts.vercel.app/og.png","buttonTitle":"🚩 Start","splashImageUrl":"https://delete-old-casts.vercel.app/logo.png","splashBackgroundColor":"#000000","requiredChains":["eip155:8453"],"requiredCapabilities":["actions.signIn","wallet.getEthereumProvider"]}}'
+        />
       </head>
 
-      <body
-        className={`${poppins.variable} antialiased`}
-      >
+      <body className={`${poppins.variable} antialiased`}>
         <Providers>{children}</Providers>
         <Toaster richColors position="top-right" />
       </body>

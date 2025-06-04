@@ -1,4 +1,7 @@
 "use client";
+
+import { useEffect, useState } from "react";
+import { sdk } from "@farcaster/frame-sdk";
 import UserHeader from "@/components/user-header";
 import UserCast from "@/components/user-cast";
 import { NeynarAuthButton, useNeynarContext } from "@neynar/react";
@@ -6,7 +9,49 @@ import { User } from "lucide-react";
 
 export default function Home() {
   const { user, isAuthenticated } = useNeynarContext();
-console.log(user)
+  const [isSDKReady, setIsSDKReady] = useState(false);
+  const [isInMiniApp, setIsInMiniApp] = useState(false);
+  const [isCheckingMiniApp, setIsCheckingMiniApp] = useState(true);
+
+  useEffect(() => {
+    const checkMiniAppAndInitializeSDK = async () => {
+      try {
+        // First check if we're in a mini app
+        const miniAppResult = await sdk.isInMiniApp();
+        setIsInMiniApp(miniAppResult);
+
+        if (miniAppResult) {
+          // Only initialize SDK if we're in a mini app
+          await sdk.actions.ready();
+        }
+
+        setIsSDKReady(true);
+      } catch (error) {
+        console.error("Error checking mini app or initializing SDK:", error);
+        // Set ready to true even if check fails to ensure app still works
+        setIsSDKReady(true);
+      } finally {
+        setIsCheckingMiniApp(false);
+      }
+    };
+
+    checkMiniAppAndInitializeSDK();
+  }, []);
+
+  // Show loading screen while checking mini app status and initializing SDK if needed
+  if (isCheckingMiniApp || (isInMiniApp && !isSDKReady)) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full mx-auto mb-4"></div>
+          <p className="text-lg text-gray-700">
+            {isCheckingMiniApp ? "Loading..." : "Initializing..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -21,7 +66,7 @@ console.log(user)
             Sign in with your Farcaster account to manage your casts
           </p>
           <div className="flex justify-center">
-            <NeynarAuthButton className="bg-gray-700 p-4 cursor-pointer  rounded-md flex items-center "  />
+            <NeynarAuthButton className="bg-gray-700 p-4 cursor-pointer rounded-md flex items-center" />
           </div>
         </div>
       </div>
