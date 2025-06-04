@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api, portalapi } from "./api"
 import { CastResponse } from "@/types";
 
@@ -66,8 +66,12 @@ const deleteCast = async (hash: string) => {
 }
 
 export const useDeleteCast = () => {
+  const queryclient = useQueryClient()
   return useMutation({
     mutationKey: ["deleteCast"],
     mutationFn: deleteCast,
+    onSuccess: () =>{
+      queryclient.invalidateQueries({queryKey: ['userCast']})
+    }
   })
 }
