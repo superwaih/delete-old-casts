@@ -11,6 +11,7 @@ import {
   Loader2,
   MessageSquare,
   Trash2,
+  ChevronDown,
 } from "lucide-react";
 
 type User = {
@@ -23,7 +24,7 @@ type User = {
   pfpUrl?: string;
 } | null;
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
 
 const formatDateTime = (timestamp: number) => {
   // The timestamp 139571705 is likely in a different format
@@ -63,6 +64,7 @@ const UserCast = ({ user }: { user: User }) => {
   const { user: userData } = useNeynarContext();
   const [selectedCasts, setSelectedCasts] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [deletingCasts, setDeletingCasts] = useState<Record<string, boolean>>(
     {}
   );
@@ -74,16 +76,54 @@ const UserCast = ({ user }: { user: User }) => {
   const messages =
     data?.messages?.filter((msg) => msg?.data?.castAddBody) ?? [];
 
-  const totalPages = Math.ceil(messages.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(messages.length / itemsPerPage);
   const paginatedMessages = messages.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Get hashes of current page messages
+  const currentPageHashes = paginatedMessages.map((msg) => msg.hash);
+
+  // Check if all current page items are selected
+  const isAllCurrentPageSelected =
+    currentPageHashes.length > 0 &&
+    currentPageHashes.every((hash) => selectedCasts.includes(hash));
+
+  // Check if some current page items are selected
+  const isSomeCurrentPageSelected = currentPageHashes.some((hash) =>
+    selectedCasts.includes(hash)
   );
 
   const toggleSelection = (hash: string) => {
     setSelectedCasts((prev) =>
       prev.includes(hash) ? prev.filter((h) => h !== hash) : [...prev, hash]
     );
+  };
+
+  const toggleSelectAllCurrentPage = () => {
+    if (isAllCurrentPageSelected) {
+      // Deselect all current page items
+      setSelectedCasts((prev) =>
+        prev.filter((hash) => !currentPageHashes.includes(hash))
+      );
+    } else {
+      // Select all current page items
+      setSelectedCasts((prev) => {
+        const newSelection = [...prev];
+        currentPageHashes.forEach((hash) => {
+          if (!newSelection.includes(hash)) {
+            newSelection.push(hash);
+          }
+        });
+        return newSelection;
+      });
+    }
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when changing items per page
   };
 
   const { mutate: deleteCast } = useDeleteCast();
@@ -154,6 +194,7 @@ const UserCast = ({ user }: { user: User }) => {
   };
 
   const isDeleting = Object.values(deletingCasts).some(Boolean);
+  const hasSelectedCasts = selectedCasts.length > 0;
 
   return (
     <section className="w-full max-w-2xl mx-auto px-6 pb-24">
@@ -164,6 +205,72 @@ const UserCast = ({ user }: { user: User }) => {
         <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm font-medium rounded-full">
           {messages.length} {messages.length === 1 ? "cast" : "casts"}
         </span>
+      </div>
+
+      {/* Controls Section */}
+      <div className="flex items-center justify-between mb-4 p-4 bg-white rounded-xl border border-gray-100">
+        {/* Select All and Items Per Page */}
+        <div className="flex items-center gap-4">
+          {/* Select All Current Page */}
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-5 h-5 rounded border cursor-pointer transition-all flex items-center justify-center ${
+                isAllCurrentPageSelected
+                  ? "bg-gray-800 border-gray-800"
+                  : isSomeCurrentPageSelected
+                  ? "bg-gray-400 border-gray-400"
+                  : "border-gray-300 hover:border-gray-400"
+              }`}
+              onClick={toggleSelectAllCurrentPage}
+            >
+              {isAllCurrentPageSelected && (
+                <Check className="text-white w-3 h-3" />
+              )}
+              {isSomeCurrentPageSelected && !isAllCurrentPageSelected && (
+                <div className="w-2 h-2 bg-white rounded-sm" />
+              )}
+            </div>
+            <span className="text-sm font-medium text-gray-700">
+              {isAllCurrentPageSelected ? "Deselect All" : "Select All"} (
+              {currentPageHashes.length})
+            </span>
+          </div>
+
+          {/* Items Per Page Selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Show:</span>
+            <div className="relative">
+              <select
+                value={itemsPerPage}
+                onChange={(e) =>
+                  handleItemsPerPageChange(Number(e.target.value))
+                }
+                disabled={hasSelectedCasts}
+                className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-1 pr-8 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+            <span className="text-sm text-gray-600">per page</span>
+          </div>
+        </div>
+
+        {/* Selected Count */}
+        {hasSelectedCasts && (
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
+              <span className="text-xs font-medium text-gray-800">
+                {selectedCasts.length}
+              </span>
+            </div>
+            <span className="text-sm font-medium text-gray-700">selected</span>
+          </div>
+        )}
       </div>
 
       {isLoading ? (
@@ -224,9 +331,9 @@ const UserCast = ({ user }: { user: User }) => {
 
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-1 text-gray-500">
-                      <p className="text-sm">
+                      <time className="text-sm">
                         {formatDateTime(msg.data.timestamp)}
-                      </p>
+                      </time>
                       
 
                       {msg.data.castAddBody.parentCastId && (
@@ -268,17 +375,22 @@ const UserCast = ({ user }: { user: User }) => {
             <div className="flex justify-center items-center mt-8">
               <nav className="flex items-center gap-1" aria-label="Pagination">
                 <button
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || hasSelectedCasts}
                   onClick={() => setCurrentPage((p) => p - 1)}
                   className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
                   aria-label="Previous page"
+                  title={
+                    hasSelectedCasts
+                      ? "Clear selections to navigate pages"
+                      : "Previous page"
+                  }
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
 
                 <div className="flex items-center">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  
+                    // Logic to show pages around current page
                     let pageNum;
                     if (totalPages <= 5) {
                       pageNum = i + 1;
@@ -294,11 +406,17 @@ const UserCast = ({ user }: { user: User }) => {
                       <button
                         key={i}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+                        disabled={hasSelectedCasts}
+                        className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:pointer-events-none ${
                           currentPage === pageNum
                             ? "bg-gray-900 text-white"
                             : "text-gray-600 hover:bg-gray-100"
                         }`}
+                        title={
+                          hasSelectedCasts
+                            ? "Clear selections to navigate pages"
+                            : `Go to page ${pageNum}`
+                        }
                       >
                         {pageNum}
                       </button>
@@ -307,16 +425,33 @@ const UserCast = ({ user }: { user: User }) => {
                 </div>
 
                 <button
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage === totalPages || hasSelectedCasts}
                   onClick={() => setCurrentPage((p) => p + 1)}
                   className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
                   aria-label="Next page"
+                  title={
+                    hasSelectedCasts
+                      ? "Clear selections to navigate pages"
+                      : "Next page"
+                  }
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </nav>
             </div>
           )}
+
+          {/* Pagination Info */}
+          <div className="text-center text-sm text-gray-500 mt-4">
+            Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+            {Math.min(currentPage * itemsPerPage, messages.length)} of{" "}
+            {messages.length} casts
+            {hasSelectedCasts && (
+              <span className="ml-2 text-amber-600 font-medium">
+                • Clear selections to change pages or items per page
+              </span>
+            )}
+          </div>
         </div>
       ) : (
         <div className="py-12 px-6 bg-gray-50 rounded-2xl border border-gray-100 text-center">
@@ -332,7 +467,7 @@ const UserCast = ({ user }: { user: User }) => {
 
       {/* Floating Delete Bar */}
       {selectedCasts.length > 0 && (
-        <div className="fixed bottom-0 left-0 w-full  border-t border-gray-200 shadow-lg z-50 backdrop-blur-sm bg-white/95">
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-lg z-50 backdrop-blur-sm bg-white/95">
           <div className="max-w-2xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">

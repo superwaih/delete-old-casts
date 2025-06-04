@@ -26,7 +26,7 @@ export default function RootLayout({
       <head>
         <meta
           name="fc:frame"
-          content='{"frame":{"version":"1","name":"Delete Old Casts","iconUrl":"https://delete-old-casts.vercel.app/logo.png","homeUrl":"https://delete-old-casts.vercel.app","imageUrl":"https://delete-old-casts.vercel.app/og.png","buttonTitle":"🚩 Start","splashImageUrl":"https://delete-old-casts.vercel.app/logo.png","splashBackgroundColor":"#000000","requiredChains":["eip155:8453"],"requiredCapabilities":["actions.signIn","wallet.getEthereumProvider"]}}'
+          content='{"frame":{"version":"1","name":"Delete Old Casts","iconUrl":"https://delete-old-casts.vercel.app/logo.png","homeUrl":"https://delete-old-casts.vercel.app","imageUrl":"https://delete-old-casts.vercel.app/og.png","buttonTitle":"🚩 Start Bulk Delete","splashImageUrl":"https://delete-old-casts.vercel.app/logo.png","splashBackgroundColor":"#000000","requiredChains":["eip155:8453"],"requiredCapabilities":["actions.signIn","wallet.getEthereumProvider"]}}'
         />
       </head>
 
