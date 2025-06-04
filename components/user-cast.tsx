@@ -68,24 +68,31 @@ const UserCast = ({ user }: { user: User }) => {
   };
 
   const { mutate: deleteCast, isPending } = useDeleteCast();
-
   const handleDelete = () => {
     if (selectedCasts.length === 0) return;
-    deleteCast(selectedCasts[0], {
-      onSuccess: (res) => {
-        toast.success("Cast Deleted Successfully");
-        console.log(res);
-        setSelectedCasts([]);
-      },
-      onError: (res) => {
-        toast.error(res.message);
-        console.log(res);
-      },
-    });
+    const databody = {
+      hash: selectedCasts[0],
+      signer: userData?.signer_uuid ?? "",
+    };
+
+    deleteCast(
+      { hash: selectedCasts[0], signer: userData?.signer_uuid ?? "" },
+      {
+        onSuccess: (res) => {
+          toast.success("Cast Deleted Successfully");
+          console.log(res);
+          setSelectedCasts([]);
+        },
+        onError: (res) => {
+          toast.error(res.message);
+          console.log(res);
+        },
+      }
+    );
   };
 
   return (
-    <section className="w-full max-w-2xl mx-auto mt-8 pb-24">
+    <section className="w-full max-w-2xl mx-auto mt-8 p-3 pb-24">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
           {user?.displayName || user?.username || "User"}'s Casts
@@ -164,26 +171,13 @@ const UserCast = ({ user }: { user: User }) => {
                         </div>
                       )}
                     </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => toggleSelection(msg.hash)}
-                        className={`p-1.5 rounded-full transition-colors ${
-                          selectedCasts.includes(msg.hash)
-                            ? "bg-gray-200 text-gray-700"
-                            : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                        }`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
           ))}
 
-          {/* Pagination Controls */}
+     
           {totalPages > 1 && (
             <div className="flex justify-center items-center mt-8">
               <nav className="flex items-center gap-1" aria-label="Pagination">
@@ -250,9 +244,9 @@ const UserCast = ({ user }: { user: User }) => {
         </div>
       )}
 
-      {/* Floating Delete Bar */}
+     
       {selectedCasts.length > 0 && (
-        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-lg z-50 backdrop-blur-sm bg-white/90">
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-lg z-50 backdrop-blur-sm ">
           <div className="max-w-2xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">

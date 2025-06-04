@@ -38,18 +38,18 @@ export const useFetchUserCast = (fid: number) => {
 //   });
 // };
 // Fixed delete cast function with proper Neynar API endpoint
-const deleteCast = async (hash: string) => {
+const deleteCast = async ({hash, signer}: {hash: string, signer: string}) => {
   try {
     const response = await fetch(`https://api.neynar.com/v2/farcaster/cast`, {
       method: "DELETE",
       headers: {
         accept: "application/json",
-        api_key:  "AD46BA8E-E6EE-4628-BE42-54E07EA838C8",
+        api_key:  "1D6A156E-9D42-447D-B098-4F611CFF78B5",
         "content-type": "application/json",
       },
       body: JSON.stringify({
         target_hash: hash,
-        signer_uuid: "041d5e39-94d7-4f96-883d-99036e130ee2",
+        signer_uuid: signer,
       }),
     })
 
@@ -69,7 +69,7 @@ export const useDeleteCast = () => {
   const queryclient = useQueryClient()
   return useMutation({
     mutationKey: ["deleteCast"],
-    mutationFn: deleteCast,
+    mutationFn:  deleteCast,
     onSuccess: () =>{
       queryclient.invalidateQueries({queryKey: ['userCast']})
     }

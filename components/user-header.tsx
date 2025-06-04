@@ -5,20 +5,20 @@ type UserHeaderProps = {
     fid: number;
     username?: string;
     displayName?: string;
-    pfpUrl?: string;
+    pfp_url?: string;
   };
 };
 
 export default function UserHeader({ user }: UserHeaderProps) {
   return (
-    <header className="w-full max-w-lg mx-auto my-6">
+    <header className="w-full p-3  m my-6">
       <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm rounded-3xl p-6 transition-all duration-300 hover:shadow-md hover:border-gray-300/50">
         <div className="flex items-center gap-5">
           {/* Profile Picture */}
           <div className="relative">
-            {user.pfpUrl ? (
+            {user?.pfp_url ? (
               <img
-                src={user.pfpUrl || "/placeholder.svg"}
+                src={user.pfp_url || "/placeholder.svg"}
                 alt="Profile Picture"
                 className="w-20 h-20 rounded-2xl object-cover ring-2 ring-gray-100 shadow-sm"
               />
