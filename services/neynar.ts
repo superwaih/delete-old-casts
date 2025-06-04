@@ -49,7 +49,7 @@ const deleteCast = async (hash: string) => {
       },
       body: JSON.stringify({
         target_hash: hash,
-        signer_uuid: "98f869d5-45ff-4070-9c56-70652c68ea10",
+        signer_uuid: "041d5e39-94d7-4f96-883d-99036e130ee2",
       }),
     })
 
