@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 type UserHeaderProps = {
   user: {
     fid: number;
@@ -13,36 +11,54 @@ type UserHeaderProps = {
 
 export default function UserHeader({ user }: UserHeaderProps) {
   return (
-    <header className="w-full max-w-md mx-auto my-4 bg-gradient-to-r from-indigo-50 to-blue-50 shadow-lg rounded-2xl p-4 flex items-center gap-4 transition-all duration-300 hover:shadow-xl">
-      {user.pfpUrl && (
-        <img
-          src={user.pfpUrl}
-          alt="Profile Picture"
-          className="w-16 h-16 rounded-full object-cover border-2 border-indigo-200 p-0.5 bg-white shadow-sm"
-        />
-      )}
-      <div className="flex-1">
-        <h1 className="text-2xl font-poppins font-semibold text-indigo-900 tracking-wide">
-          Welcome, {user.displayName || user.username || "User"}
-        </h1>
-        <div className="mt-2 text-sm text-gray-700 font-poppins space-y-1">
-          <p className="font-medium text-indigo-800">FID: {user.fid}</p>
-          {user.username && (
-            <p className="text-gray-600">
-              Username:{" "}
-              <span className="font-medium text-indigo-700">
-                {user.username}
+    <header className="w-full max-w-lg mx-auto my-6">
+      <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm rounded-3xl p-6 transition-all duration-300 hover:shadow-md hover:border-gray-300/50">
+        <div className="flex items-center gap-5">
+          {/* Profile Picture */}
+          <div className="relative">
+            {user.pfpUrl ? (
+              <img
+                src={user.pfpUrl || "/placeholder.svg"}
+                alt="Profile Picture"
+                className="w-20 h-20 rounded-2xl object-cover ring-2 ring-gray-100 shadow-sm"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-sm">
+                <span className="text-2xl font-semibold text-gray-500">
+                  {(user.displayName || user.username || "U")
+                    .charAt(0)
+                    .toUpperCase()}
+                </span>
+              </div>
+            )}
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-2 border-white shadow-sm"></div>
+          </div>
+
+          {/* User Info */}
+          <div className="flex-1 min-w-0">
+            <div className="mb-3">
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-tight">
+                {user.displayName || user.username || "User"}
+              </h1>
+              {user.displayName && user.username && (
+                <p className="text-sm text-gray-500 font-medium mt-1">
+                  @{user.username}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="px-3 py-1.5 bg-gray-50 rounded-full">
+                <span className="text-xs font-medium text-gray-600">
+                  FID: {user.fid}
+                </span>
+              </div>
+              <div className="w-1.5 h-1.5 bg-gray-300 rounded-full"></div>
+              <span className="text-xs text-gray-500 font-medium">
+                Active now
               </span>
-            </p>
-          )}
-          {user.displayName && (
-            <p className="text-gray-600">
-              Display Name:{" "}
-              <span className="font-medium text-indigo-700">
-                {user.displayName}
-              </span>
-            </p>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </header>
