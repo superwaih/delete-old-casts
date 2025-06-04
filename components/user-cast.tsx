@@ -224,13 +224,10 @@ const UserCast = ({ user }: { user: User }) => {
 
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-1 text-gray-500">
-                      <time className="text-sm">
+                      <p className="text-sm">
                         {formatDateTime(msg.data.timestamp)}
-                      </time>
-                      {/* Debug: show raw timestamp */}
-                      <span className="text-xs text-gray-400 ml-2">
-                        ({msg.data.timestamp})
-                      </span>
+                      </p>
+                      
 
                       {msg.data.castAddBody.parentCastId && (
                         <div className="flex items-center ml-3 text-sm text-gray-500">
@@ -281,7 +278,7 @@ const UserCast = ({ user }: { user: User }) => {
 
                 <div className="flex items-center">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    // Logic to show pages around current page
+                  
                     let pageNum;
                     if (totalPages <= 5) {
                       pageNum = i + 1;
@@ -335,7 +332,7 @@ const UserCast = ({ user }: { user: User }) => {
 
       {/* Floating Delete Bar */}
       {selectedCasts.length > 0 && (
-        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-lg z-50 backdrop-blur-sm bg-white/95">
+        <div className="fixed bottom-0 left-0 w-full  border-t border-gray-200 shadow-lg z-50 backdrop-blur-sm bg-white/95">
           <div className="max-w-2xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
