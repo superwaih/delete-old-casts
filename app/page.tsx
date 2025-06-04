@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { sdk } from "@farcaster/frame-sdk";
 import UserHeader from "@/components/user-header";
 import UserCast from "@/components/user-cast";
-import { getFidCreationDate } from "@/services/base";
+import LandingPage from "@/components/landing-page";
+
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInMiniApp, setIsInMiniApp] = useState(false);
@@ -55,21 +56,37 @@ export default function Home() {
     }
   }, [isLoaded]);
 
+
+ 
+
   return (
-    <main className="min-h-screen bg-gray-50 text-black  p-6">
-      {/* <NeynarAuthButton /> */}
+    <>
       {isInMiniApp ? (
         user ? (
-          <>
-            <UserHeader user={user} />
-            <UserCast user={user} />
-          </>
+          <div className="min-h-screen bg-gray-50">
+            {/* Fixed Header */}
+            <div className="sticky top-0 z-40 bg-gray-50/80 backdrop-blur-sm border-b border-gray-200/50">
+              <UserHeader user={user} />
+            </div>
+
+            {/* Main Content */}
+            <div className="pb-6">
+              <UserCast user={user} />
+            </div>
+          </div>
         ) : (
-          <div className="text-lg text-gray-700">Prompting sign-in...</div>
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full mx-auto mb-4"></div>
+              <p className="text-lg text-gray-700">
+                Connecting to Farcaster...
+              </p>
+            </div>
+          </div>
         )
       ) : (
-        <div className="text-lg text-red-500">Not welcome here</div>
+        <LandingPage />
       )}
-    </main>
+    </>
   );
 }
