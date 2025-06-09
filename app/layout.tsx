@@ -24,24 +24,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-      <meta
-  name="fc:frame"
-  content='{
+        <meta
+          name="fc:frame"
+          content='{
     "version": "next",
     "imageUrl": "https://delete-old-casts.vercel.app/og.png",
     "button": {
-      "title": "🚩 Start Bulk Delete",
+      "title": "🚩 Bulk Cast Manager",
       "action": {
         "type": "launch_frame",
         "url": "https://delete-old-casts.vercel.app",
-        "name": "Delete Old Casts",
+        "name": "Bulk Cast Manager",
         "splashImageUrl": "https://delete-old-casts.vercel.app/logo.png",
         "splashBackgroundColor": "#000000"
       }
     }
   }'
-/>
-
+        />
       </head>
 
       <body className={`${poppins.variable} antialiased`}>
