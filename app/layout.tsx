@@ -24,10 +24,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta
-          name="fc:frame"
-          content='{"frame":{"version":"1","name":"Delete Old Casts","iconUrl":"https://delete-old-casts.vercel.app/logo.png","homeUrl":"https://delete-old-casts.vercel.app","imageUrl":"https://delete-old-casts.vercel.app/og.png","buttonTitle":"🚩 Start Bulk Delete","splashImageUrl":"https://delete-old-casts.vercel.app/logo.png","splashBackgroundColor":"#000000","requiredChains":["eip155:8453"],"requiredCapabilities":["actions.signIn","wallet.getEthereumProvider"]}}'
-        />
+      <meta
+  name="fc:frame"
+  content='{
+    "version": "next",
+    "imageUrl": "https://delete-old-casts.vercel.app/og.png",
+    "button": {
+      "title": "🚩 Start Bulk Delete",
+      "action": {
+        "type": "launch_frame",
+        "url": "https://delete-old-casts.vercel.app",
+        "name": "Delete Old Casts",
+        "splashImageUrl": "https://delete-old-casts.vercel.app/logo.png",
+        "splashBackgroundColor": "#000000"
+      }
+    }
+  }'
+/>
+
       </head>
 
       <body className={`${poppins.variable} antialiased`}>
