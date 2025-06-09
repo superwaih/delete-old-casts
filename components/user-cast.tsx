@@ -24,7 +24,7 @@ type User = {
   pfpUrl?: string;
 } | null;
 
-const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100];
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 15, 25];
 
 const formatDateTime = (timestamp: number) => {
   // The timestamp 139571705 is likely in a different format
