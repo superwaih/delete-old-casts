@@ -1,4 +1,10 @@
 {
+  
+    "accountAssociation": {
+      "header": "eyJmaWQiOjI2NzEwNCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDYyZTMwNDc4MjE2Mzg5OEM1YzM3RmI1QWIxNGQ5ZDM3MTVFNzhDQUEifQ",
+      "payload": "eyJkb21haW4iOiJkZWxldGUtb2xkLWNhc3RzLnZlcmNlbC5hcHAifQ",
+      "signature": "MHhhNzU4YjFiZDVhZDQ4ZWI3ZDE5NjBlZTJiYTI5NWVlZmQyOWM5MzM0OGU1OGFlNTAzYWMwNjQ2YzhlOTVmY2RlNTQ4MGIwYWQ1NWM0N2FkYTE4NGJmY2IyNzBmNTEwY2M0ZDk5MjUxZTIyYzJkZmE3OGQ0MzgxNjk5ODJjM2UzYzFj"
+    },
   "frame": {
     "version": "1",
     "name": "Bulk Cast Manager",
