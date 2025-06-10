@@ -28,6 +28,7 @@ export default function HomeAlternative() {
           try {
             const context = await sdk.context;
             if (context?.user) {
+              //@ts-ignore
               setFarcasterUser(context.user);
             }
           } catch (error) {
