@@ -63,12 +63,12 @@ export default function UserHeader() {
               </span>
             </div>
           </div>
-           <button
+           {/* <button
           onClick={logoutUser}
           className="ml-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
         >
           Sign Out
-        </button>
+        </button> */}
         </div>
       </div>
     </header>
