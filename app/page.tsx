@@ -76,7 +76,6 @@ export default function Home() {
   }
 
   const isUserAuthenticated = isInMiniApp ? !!farcasterUser : isAuthenticated;
-  // const currentUser = isInMiniApp ? farcasterUser : user;
 
   if (!isUserAuthenticated  && !user) {
     return (
