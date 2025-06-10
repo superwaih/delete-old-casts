@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { sdk } from "@farcaster/frame-sdk";
 import UserHeader from "@/components/user-header";
 import UserCast from "@/components/user-cast";
-import { NeynarAuthButton, useNeynarContext } from "@neynar/react";
+import { NeynarAuthButton, SIWN_variant, useNeynarContext } from "@neynar/react";
 import { User } from "lucide-react";
 
 export default function Home() {
@@ -69,6 +69,7 @@ export default function Home() {
           </p>
             <div className="flex justify-center">
             <NeynarAuthButton
+            variant={SIWN_variant.NEYNAR}
               className="bg-gray-700 p-4 cursor-pointer rounded-md flex items-center text-white"
             />
             </div>
