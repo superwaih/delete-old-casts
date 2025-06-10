@@ -1,5 +1,7 @@
 "use client";
 
+import { useNeynarContext } from "@neynar/react";
+
 type UserHeaderProps = {
   user: {
     fid: number;
@@ -10,6 +12,8 @@ type UserHeaderProps = {
 };
 
 export default function UserHeader({ user }: UserHeaderProps) {
+    const { logoutUser} = useNeynarContext(); // <-- add signOut
+  
   return (
     <header className="w-full p-3  m my-6">
       <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm rounded-3xl p-6 transition-all duration-300 hover:shadow-md hover:border-gray-300/50">
@@ -59,6 +63,12 @@ export default function UserHeader({ user }: UserHeaderProps) {
               </span>
             </div>
           </div>
+           <button
+          onClick={logoutUser}
+          className="ml-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+        >
+          Sign Out
+        </button>
         </div>
       </div>
     </header>
