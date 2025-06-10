@@ -15,6 +15,6 @@
     "splashImageUrl": "https://delete-old-casts.vercel.app/logo.png",
     "splashBackgroundColor": "#000000",
     "requiredChains": ["eip155:8453"],
-    "requiredCapabilities": ["actions.signIn", "wallet.getEthereumProvider"]
+    "requiredCapabilities": ["actions.signIn", "actions.addMiniApp", "wallet.getEthereumProvider"]
   }
 }
