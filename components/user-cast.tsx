@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useDeleteCast, useFetchUserCast } from "@/services/neynar";
-import { useNeynarContext } from "@neynar/react";
+import { useNeynarContext, NeynarAuthButton } from "@neynar/react";
 import { toast } from "sonner";
 import {
   Check,
@@ -12,17 +12,8 @@ import {
   MessageSquare,
   Trash2,
   ChevronDown,
+  User,
 } from "lucide-react";
-
-type User = {
-  fid: number;
-  username?: string;
-  display_name?: string;
-  pfp_url?: string;
-  // Handle both naming conventions
-  displayName?: string;
-  pfpUrl?: string;
-} | null;
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 15, 25];
 
@@ -50,9 +41,9 @@ const formatDateTime = (timestamp: number) => {
   });
 };
 
-const UserCast = ({ user }: { user: User }) => {
+const UserCast = () => {
+  const { user, isAuthenticated } = useNeynarContext();
   const { data, isLoading, refetch } = useFetchUserCast(user?.fid ?? 0);
-  const { user: userData } = useNeynarContext();
   const [selectedCasts, setSelectedCasts] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -60,7 +51,48 @@ const UserCast = ({ user }: { user: User }) => {
     {}
   );
 
-  const displayName = user?.display_name || user?.displayName;
+  // Handle unauthenticated users
+  if (!isAuthenticated || !user) {
+    return (
+      <section className="w-full max-w-2xl mx-auto px-6 pb-24">
+        <div className="py-12 px-6 bg-gray-50 rounded-2xl border border-gray-100 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-900 rounded-2xl mb-6">
+            <User className="w-8 h-8 text-white" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">
+            Authentication Required
+          </h3>
+          <p className="text-gray-500 text-sm mb-6">
+            Please sign in to view and manage your casts.
+          </p>
+          <NeynarAuthButton className="bg-gray-700 p-4 cursor-pointer rounded-md flex items-center text-white hover:bg-gray-800 transition-colors mx-auto" />
+        </div>
+      </section>
+    );
+  }
+
+  // Check if user has signer_uuid for deletion functionality
+  if (!user.signer_uuid) {
+    return (
+      <section className="w-full max-w-2xl mx-auto px-6 pb-24">
+        <div className="py-12 px-6 bg-amber-50 rounded-2xl border border-amber-200 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-500 rounded-2xl mb-6">
+            <User className="w-8 h-8 text-white" />
+          </div>
+          <h3 className="text-lg font-medium text-amber-800 mb-2">
+            Signer Required
+          </h3>
+          <p className="text-amber-700 text-sm mb-6">
+            Your account doesn't have a signer UUID. Please re-authenticate to
+            enable cast management.
+          </p>
+          <NeynarAuthButton className="bg-amber-600 p-4 cursor-pointer rounded-md flex items-center text-white hover:bg-amber-700 transition-colors mx-auto" />
+        </div>
+      </section>
+    );
+  }
+
+  const displayName = user?.display_name;
   const username = user?.username;
 
   const messages =
@@ -119,7 +151,7 @@ const UserCast = ({ user }: { user: User }) => {
   const { mutate: deleteCast } = useDeleteCast();
 
   const handleDelete = async () => {
-    if (selectedCasts.length === 0) return;
+    if (selectedCasts.length === 0 || !user.signer_uuid) return;
 
     // Create a copy of selected casts to avoid state mutation issues during deletion
     const castsToDelete = [...selectedCasts];
@@ -134,11 +166,12 @@ const UserCast = ({ user }: { user: User }) => {
       newDeletingState[hash] = true;
     });
     setDeletingCasts(newDeletingState);
+
     for (const hash of castsToDelete) {
       try {
         await new Promise<void>((resolve, reject) => {
           deleteCast(
-            { hash, signer: userData?.signer_uuid ?? "" },
+            { hash, signer: user.signer_uuid },
             {
               onSuccess: () => {
                 successCount++;
@@ -321,7 +354,6 @@ const UserCast = ({ user }: { user: User }) => {
                       <time className="text-sm">
                         {formatDateTime(msg.data.timestamp)}
                       </time>
-                      
 
                       {msg.data.castAddBody.parentCastId && (
                         <div className="flex items-center ml-3 text-sm text-gray-500">

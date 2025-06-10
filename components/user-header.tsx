@@ -1,21 +1,33 @@
 "use client";
 
-import { useNeynarContext } from "@neynar/react";
-
-type UserHeaderProps = {
-  user: {
-    fid: number;
-    username?: string;
-    displayName?: string;
-    pfp_url?: string;
-  };
-};
+import { useNeynarContext, NeynarAuthButton } from "@neynar/react";
+import { User } from "lucide-react";
 
 export default function UserHeader() {
-    const { user, logoutUser} = useNeynarContext();
-  if(!user) return
+  const { user, logoutUser, isAuthenticated } = useNeynarContext();
+
+  if (!isAuthenticated || !user) {
+    return (
+      <header className="w-full p-3 my-6">
+        <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm rounded-3xl p-6 transition-all duration-300 hover:shadow-md hover:border-gray-300/50">
+          <div className="flex items-center justify-center gap-4">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-900 rounded-2xl">
+              <User className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-center">
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                Please sign in to continue
+              </h2>
+              <NeynarAuthButton className="bg-gray-700 p-3 cursor-pointer rounded-md flex items-center text-white hover:bg-gray-800 transition-colors" />
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
-    <header className="w-full p-3  m my-6">
+    <header className="w-full p-3 my-6">
       <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm rounded-3xl p-6 transition-all duration-300 hover:shadow-md hover:border-gray-300/50">
         <div className="flex items-center gap-5">
           {/* Profile Picture */}
@@ -63,12 +75,12 @@ export default function UserHeader() {
               </span>
             </div>
           </div>
-           {/* <button
-          onClick={logoutUser}
-          className="ml-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-        >
-          Sign Out
-        </button> */}
+          <button
+            onClick={logoutUser}
+            className="ml-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
     </header>

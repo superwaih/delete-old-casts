@@ -131,16 +131,9 @@ export default function HomeAlternative() {
       <div className="sticky top-0 z-40 bg-gray-50/80 backdrop-blur-sm border-b border-gray-200/50">
         <UserHeader />
       </div>
-      <div className="flex  justify-end items-end ">
-        <button
-          onClick={logoutUser}
-          className=" max-w-md bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-        >
-          Sign Out
-        </button>
-      </div>
+
       <div className="pb-6">
-        <UserCast user={currentUser} />
+        <UserCast />
       </div>
     </div>
   );
