@@ -26,7 +26,7 @@ export default function Home() {
         }
 
         setIsSDKReady(true);
-          await sdk.actions.addMiniApp()
+          // await sdk.actions.addMiniApp()
 
       } catch (error) {
         console.error("Error checking mini app or initializing SDK:", error);
