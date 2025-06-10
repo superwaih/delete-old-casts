@@ -29,7 +29,7 @@ export default function RootLayout({
         <meta
           name="fc:frame"
           content={`{
-            "version": "Next",
+            "version": "next",
             "imageUrl": "https://delete-old-casts.vercel.app/og.png",
             "button": {
               "title": "🚩 Bulk Cast Manager",
