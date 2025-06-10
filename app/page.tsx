@@ -52,7 +52,7 @@ export default function HomeAlternative() {
     try {
       // For mini apps, we can try to open the auth URL in the same window
       // or use a different authentication strategy
-      const authUrl = `${window.location.origin}/auth/neynar?miniapp=true`;
+      const authUrl = `${window.location.origin}`;
 
       // Use the Farcaster SDK to open the URL
       if (isInMiniApp) {
