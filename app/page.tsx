@@ -7,8 +7,8 @@ import UserCast from "@/components/user-cast";
 import { NeynarAuthButton, useNeynarContext } from "@neynar/react";
 import { User } from "lucide-react";
 
-export default function HomeAlternative() {
-  const { user, isAuthenticated, logoutUser } = useNeynarContext();
+export default function Home() {
+  const { user, isAuthenticated, logoutUser, } = useNeynarContext();
   const [isSDKReady, setIsSDKReady] = useState(false);
   const [isInMiniApp, setIsInMiniApp] = useState(false);
   const [isCheckingMiniApp, setIsCheckingMiniApp] = useState(true);
@@ -76,7 +76,7 @@ export default function HomeAlternative() {
   }
 
   const isUserAuthenticated = isInMiniApp ? !!farcasterUser : isAuthenticated;
-  const currentUser = isInMiniApp ? farcasterUser : user;
+  // const currentUser = isInMiniApp ? farcasterUser : user;
 
   if (!isUserAuthenticated) {
     return (
@@ -115,7 +115,7 @@ export default function HomeAlternative() {
     );
   }
 
-  if (!currentUser) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -131,16 +131,9 @@ export default function HomeAlternative() {
       <div className="sticky top-0 z-40 bg-gray-50/80 backdrop-blur-sm border-b border-gray-200/50">
         <UserHeader />
       </div>
-      <div className="flex mx-auto my-4 justify-center items-center max-w-lg">
-        <button
-          onClick={logoutUser}
-          className=" w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-        >
-          Sign Out
-        </button>
-      </div>
+      
       <div className="pb-6">
-        <UserCast user={currentUser} />
+        <UserCast user={user} />
       </div>
     </div>
   );
