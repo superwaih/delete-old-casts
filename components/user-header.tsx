@@ -12,7 +12,7 @@ type UserHeaderProps = {
 };
 
 export default function UserHeader() {
-    const { user, logoutUser} = useNeynarContext(); // <-- add signOut
+    const { user, logoutUser} = useNeynarContext();
   if(!user) return
   return (
     <header className="w-full p-3  m my-6">

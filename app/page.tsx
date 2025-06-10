@@ -8,7 +8,7 @@ import { NeynarAuthButton, useNeynarContext } from "@neynar/react";
 import { User } from "lucide-react";
 
 export default function HomeAlternative() {
-  const { user, isAuthenticated } = useNeynarContext();
+  const { user, isAuthenticated, logoutUser } = useNeynarContext();
   const [isSDKReady, setIsSDKReady] = useState(false);
   const [isInMiniApp, setIsInMiniApp] = useState(false);
   const [isCheckingMiniApp, setIsCheckingMiniApp] = useState(true);
@@ -128,8 +128,14 @@ export default function HomeAlternative() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <button
+        onClick={logoutUser}
+        className=" w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+      >
+        Sign Out
+      </button>
       <div className="sticky top-0 z-40 bg-gray-50/80 backdrop-blur-sm border-b border-gray-200/50">
-        <UserHeader  />
+        <UserHeader />
       </div>
       <div className="pb-6">
         <UserCast user={currentUser} />
