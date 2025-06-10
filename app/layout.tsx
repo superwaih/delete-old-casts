@@ -12,7 +12,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Delete Old Casts",
+  title: "Bulk Cast Manager",
   description: "Mini-App Developed By Shittu Adewale",
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
         <meta
           name="fc:frame"
           content={`{
-            "version": "vNext",
+            "version": "Next",
             "imageUrl": "https://delete-old-casts.vercel.app/og.png",
             "button": {
               "title": "🚩 Bulk Cast Manager",
