@@ -23,6 +23,7 @@ export default function Home() {
         if (miniAppResult) {
           // Only initialize SDK if we're in a mini app
           await sdk.actions.ready();
+          await sdk.actions.addMiniApp()
         }
 
         setIsSDKReady(true);
