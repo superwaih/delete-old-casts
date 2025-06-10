@@ -65,13 +65,12 @@ export default function Home() {
           <p className="text-gray-600 mb-8">
             Sign in with your Farcaster account to manage your casts
           </p>
-          <div className="flex justify-center">
-             variant="popup"
+            <div className="flex justify-center">
             <NeynarAuthButton
-  className="bg-gray-700 p-4 cursor-pointer rounded-md flex items-center text-white"
-            
-             />
-          </div>
+              className="bg-gray-700 p-4 cursor-pointer rounded-md flex items-center text-white"
+              variant="farcaster"
+            />
+            </div>
         </div>
       </div>
     );

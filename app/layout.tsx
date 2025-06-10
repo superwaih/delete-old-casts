@@ -24,25 +24,26 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
         <meta
           name="fc:frame"
-          content='{
-    "version": "next",
-    "imageUrl": "https://delete-old-casts.vercel.app/og.png",
-    "button": {
-      "title": "🚩 Bulk Cast Manager",
-      "action": {
-        "type": "launch_frame",
-        "url": "https://delete-old-casts.vercel.app",
-        "name": "Bulk Cast Manager",
-        "splashImageUrl": "https://delete-old-casts.vercel.app/logo.png",
-        "splashBackgroundColor": "#000000"
-      }
-    }
-  }'
+          content={`{
+            "version": "vNext",
+            "imageUrl": "https://delete-old-casts.vercel.app/og.png",
+            "button": {
+              "title": "🚩 Bulk Cast Manager",
+              "action": {
+                "type": "launch_frame",
+                "url": "https://delete-old-casts.vercel.app",
+                "name": "Bulk Cast Manager",
+                "splashImageUrl": "https://delete-old-casts.vercel.app/logo.png",
+                "splashBackgroundColor": "#000000"
+              }
+            }
+          }`}
         />
       </head>
-
       <body className={`${poppins.variable} antialiased`}>
         <Providers>{children}</Providers>
         <Toaster richColors position="top-right" />
