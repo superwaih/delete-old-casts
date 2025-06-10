@@ -7,7 +7,7 @@ import { NeynarAuthButton, SIWN_variant, useNeynarContext } from "@neynar/react"
 import { User } from "lucide-react";
 
 export default function Home() {
-  const { user, isAuthenticated } = useNeynarContext();
+  const { user, isAuthenticated,  logoutUser} = useNeynarContext(); // <-- add signOut
   const [isSDKReady, setIsSDKReady] = useState(false);
   const [isInMiniApp, setIsInMiniApp] = useState(false);
   const [isCheckingMiniApp, setIsCheckingMiniApp] = useState(true);
@@ -167,8 +167,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Fixed Header */}
-      <div className="sticky top-0 z-40 bg-gray-50/80 backdrop-blur-sm border-b border-gray-200/50">
+      <div className="sticky top-0 z-40 bg-gray-50/80 backdrop-blur-sm border-b border-gray-200/50 flex items-center justify-between px-4">
         <UserHeader user={user} />
+        <button
+          onClick={logoutUser}
+          className="ml-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+        >
+          Sign Out
+        </button>
       </div>
       {/* Main Content */}
       <div className="pb-6">
