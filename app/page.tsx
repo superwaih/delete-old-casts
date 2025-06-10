@@ -69,7 +69,6 @@ export default function Home() {
             <div className="flex justify-center">
             <NeynarAuthButton
               className="bg-gray-700 p-4 cursor-pointer rounded-md flex items-center text-white"
-              // variant="farcaster"
             />
             </div>
         </div>
