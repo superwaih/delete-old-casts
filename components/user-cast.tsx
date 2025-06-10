@@ -27,19 +27,11 @@ type User = {
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 15, 25];
 
 const formatDateTime = (timestamp: number) => {
-  // The timestamp 139571705 is likely in a different format
-  // Let's try different approaches to get the correct date
-
-  // First, let's try treating it as milliseconds directly
   let date = new Date(timestamp);
-
-  // If that gives us a date in 1970, it's likely seconds, so multiply by 1000
   if (date.getFullYear() < 1990) {
     date = new Date(timestamp * 1000);
   }
 
-  // If we're still getting dates in the 1970s, it might be a different epoch
-  // Farcaster might use a different epoch (like January 1, 2021)
   if (date.getFullYear() < 1990) {
     // Try Farcaster epoch: January 1, 2021 00:00:00 UTC
     const farcasterEpoch = new Date("2021-01-01T00:00:00Z").getTime();
@@ -51,7 +43,6 @@ const formatDateTime = (timestamp: number) => {
     return "Invalid date";
   }
 
-  // Format as "Jan 2, 1970"
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -69,7 +60,6 @@ const UserCast = ({ user }: { user: User }) => {
     {}
   );
 
-  // Handle both naming conventions
   const displayName = user?.display_name || user?.displayName;
   const username = user?.username;
 
@@ -144,8 +134,6 @@ const UserCast = ({ user }: { user: User }) => {
       newDeletingState[hash] = true;
     });
     setDeletingCasts(newDeletingState);
-
-    // Process each cast sequentially
     for (const hash of castsToDelete) {
       try {
         await new Promise<void>((resolve, reject) => {
@@ -260,7 +248,6 @@ const UserCast = ({ user }: { user: User }) => {
           </div>
         </div>
 
-        {/* Selected Count */}
         {hasSelectedCasts && (
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">

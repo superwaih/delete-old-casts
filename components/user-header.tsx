@@ -11,9 +11,9 @@ type UserHeaderProps = {
   };
 };
 
-export default function UserHeader({ user }: UserHeaderProps) {
-    const { logoutUser} = useNeynarContext(); // <-- add signOut
-  
+export default function UserHeader() {
+    const { user, logoutUser} = useNeynarContext(); // <-- add signOut
+  if(!user) return
   return (
     <header className="w-full p-3  m my-6">
       <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm rounded-3xl p-6 transition-all duration-300 hover:shadow-md hover:border-gray-300/50">
@@ -29,7 +29,7 @@ export default function UserHeader({ user }: UserHeaderProps) {
             ) : (
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-sm">
                 <span className="text-2xl font-semibold text-gray-500">
-                  {(user.displayName || user.username || "U")
+                  {(user?.display_name || user?.username || "U")
                     .charAt(0)
                     .toUpperCase()}
                 </span>
@@ -42,9 +42,9 @@ export default function UserHeader({ user }: UserHeaderProps) {
           <div className="flex-1 min-w-0">
             <div className="mb-3">
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-tight">
-                {user.displayName || user.username || "User"}
+                {user?.display_name || user.username || "User"}
               </h1>
-              {user.displayName && user.username && (
+              {user.display_name && user.username && (
                 <p className="text-sm text-gray-500 font-medium mt-1">
                   @{user.username}
                 </p>

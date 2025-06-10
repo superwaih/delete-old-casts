@@ -50,11 +50,8 @@ export default function HomeAlternative() {
 
   const handleMiniAppAuth = async () => {
     try {
-      // For mini apps, we can try to open the auth URL in the same window
-      // or use a different authentication strategy
       const authUrl = `${window.location.origin}`;
 
-      // Use the Farcaster SDK to open the URL
       if (isInMiniApp) {
         await sdk.actions.openUrl(authUrl);
       } else {
@@ -132,7 +129,7 @@ export default function HomeAlternative() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="sticky top-0 z-40 bg-gray-50/80 backdrop-blur-sm border-b border-gray-200/50">
-        <UserHeader user={currentUser} />
+        <UserHeader  />
       </div>
       <div className="pb-6">
         <UserCast user={currentUser} />
