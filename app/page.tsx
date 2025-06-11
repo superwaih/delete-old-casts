@@ -27,7 +27,13 @@ export default function Home() {
   const [isSDKReady, setIsSDKReady] = useState(false);
   const [isInMiniApp, setIsInMiniApp] = useState(false);
   const [isCheckingMiniApp, setIsCheckingMiniApp] = useState(true);
-  const [farcasterUser, setFarcasterUser] = useState(null);
+  interface FarcasterUser {
+    username?: string;
+    displayName?: string;
+    fid: number;
+    [key: string]: any;
+  }
+  const [farcasterUser, setFarcasterUser] = useState<FarcasterUser | null>(null);
   const [signerData, setSignerData] = useState<SignerData | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isCreatingSigner, setIsCreatingSigner] = useState(false);
@@ -43,7 +49,6 @@ export default function Home() {
           await sdk.actions.ready();
           await sdk.actions.addMiniApp();
 
-          // Get user context from Farcaster SDK
           try {
             const context = await sdk.context;
             if (context?.user) {
@@ -115,9 +120,10 @@ export default function Home() {
 
       const data: SignerData = await response.json();
       setSignerData(data);
-
+console.log(data)
       // Store signer UUID for later use
       localStorage.setItem("signer_uuid", data.signer_uuid);
+      console.log(data.signer_uuid)
     } catch (error) {
       console.error("Error creating signer:", error);
       setAuthError("Failed to create signer. Please try again.");
@@ -128,10 +134,9 @@ export default function Home() {
 
   const handleSignerApproved = async () => {
     if (!signerData) return;
-
     try {
       const response = await fetch(
-        `/api/user?signer_uuid=${signerData.signer_uuid}`
+        `/api/user?signer_uuid=${signerData.signer_uuid}&fid=${farcasterUser?.fid}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -162,7 +167,6 @@ export default function Home() {
     );
   }
 
-  // Show QR code if signer exists but user data is not loaded (pending approval)
   if (signerData && !userData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

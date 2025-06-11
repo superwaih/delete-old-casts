@@ -8,7 +8,6 @@ export async function GET(req: Request) {
   if (!fid) {
     return NextResponse.json({ error: "FID is required" }, { status: 400 })
   }
-
   try {
     // Fetch user casts from Neynar
     const casts = await neynarClient.fetchCastsForUser({
