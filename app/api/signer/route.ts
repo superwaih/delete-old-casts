@@ -7,6 +7,6 @@ export async function POST() {
     return NextResponse.json(signedKey, { status: 200 })
   } catch (error) {
     console.error(error)
-    return NextResponse.json({ error: "An error occurred" }, { status: 500 })
+    return NextResponse.json({ error: "An error occurred" ,message: error}, { status: 500 })
   }
 }
