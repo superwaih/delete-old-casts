@@ -1,8 +1,8 @@
+
 "use client";
 
-import { useState } from "react";
-import { useDeleteCast, useFetchUserCast } from "@/services/neynar";
-import { useNeynarContext } from "@neynar/react";
+import { useState, useEffect } from "react";
+import { useFetchUserCast, useDeleteCast } from "@/services/neynar";
 import { toast } from "sonner";
 import {
   Check,
@@ -13,6 +13,7 @@ import {
   Trash2,
   ChevronDown,
 } from "lucide-react";
+import CustomDialog from "@/components/custom-dialog";
 
 type User = {
   fid: number;
@@ -23,6 +24,11 @@ type User = {
   displayName?: string;
   pfpUrl?: string;
 } | null;
+
+interface UserCastProps {
+  user: User;
+  signerUuid?: string;
+}
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 15, 25];
 
@@ -50,21 +56,27 @@ const formatDateTime = (timestamp: number) => {
   });
 };
 
-const UserCast = ({ user }: { user: User }) => {
+export default function UserCast({ user, signerUuid }: UserCastProps) {
   const { data, isLoading, refetch } = useFetchUserCast(user?.fid ?? 0);
-  const { user: userData } = useNeynarContext();
   const [selectedCasts, setSelectedCasts] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [deletingCasts, setDeletingCasts] = useState<Record<string, boolean>>(
     {}
   );
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [castsToDelete, setCastsToDelete] = useState<string[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletedCasts, setDeletedCasts] = useState<Set<string>>(new Set());
 
   const displayName = user?.display_name || user?.displayName;
   const username = user?.username;
 
+  // Filter out deleted casts from the messages
   const messages =
-    data?.messages?.filter((msg) => msg?.data?.castAddBody) ?? [];
+    data?.messages?.filter(
+      (msg) => msg?.data?.castAddBody && !deletedCasts.has(msg.hash)
+    ) ?? [];
 
   const totalPages = Math.ceil(messages.length / itemsPerPage);
   const paginatedMessages = messages.slice(
@@ -72,8 +84,10 @@ const UserCast = ({ user }: { user: User }) => {
     currentPage * itemsPerPage
   );
 
-  // Get hashes of current page messages
-  const currentPageHashes = paginatedMessages.map((msg) => msg.hash);
+  // Get hashes of current page messages (excluding deleted ones)
+  const currentPageHashes = paginatedMessages
+    .map((msg) => msg.hash)
+    .filter((hash) => !deletedCasts.has(hash));
 
   // Check if all current page items are selected
   const isAllCurrentPageSelected =
@@ -85,7 +99,19 @@ const UserCast = ({ user }: { user: User }) => {
     selectedCasts.includes(hash)
   );
 
+  // Clean up selected casts when casts are deleted
+  useEffect(() => {
+    if (deletedCasts.size > 0) {
+      setSelectedCasts((prev) =>
+        prev.filter((hash) => !deletedCasts.has(hash))
+      );
+    }
+  }, [deletedCasts]);
+
   const toggleSelection = (hash: string) => {
+    // Don't allow selection of deleted casts
+    if (deletedCasts.has(hash) || deletingCasts[hash]) return;
+
     setSelectedCasts((prev) =>
       prev.includes(hash) ? prev.filter((h) => h !== hash) : [...prev, hash]
     );
@@ -98,11 +124,11 @@ const UserCast = ({ user }: { user: User }) => {
         prev.filter((hash) => !currentPageHashes.includes(hash))
       );
     } else {
-      // Select all current page items
+      // Select all current page items (excluding deleted ones)
       setSelectedCasts((prev) => {
         const newSelection = [...prev];
         currentPageHashes.forEach((hash) => {
-          if (!newSelection.includes(hash)) {
+          if (!newSelection.includes(hash) && !deletedCasts.has(hash)) {
             newSelection.push(hash);
           }
         });
@@ -118,13 +144,19 @@ const UserCast = ({ user }: { user: User }) => {
 
   const { mutate: deleteCast } = useDeleteCast();
 
+  const confirmDelete = () => {
+    // Filter out any deleted casts from selection
+    const validCastsToDelete = selectedCasts.filter(
+      (hash) => !deletedCasts.has(hash)
+    );
+    setCastsToDelete(validCastsToDelete);
+    setShowDeleteConfirm(true);
+  };
+
   const handleDelete = async () => {
-    if (selectedCasts.length === 0) return;
+    if (castsToDelete.length === 0) return;
 
-    // Create a copy of selected casts to avoid state mutation issues during deletion
-    const castsToDelete = [...selectedCasts];
-
-    // Track overall success/failure
+    setIsDeleting(true);
     let successCount = 0;
     let failureCount = 0;
 
@@ -134,14 +166,18 @@ const UserCast = ({ user }: { user: User }) => {
       newDeletingState[hash] = true;
     });
     setDeletingCasts(newDeletingState);
+
+    // Process deletions
     for (const hash of castsToDelete) {
       try {
         await new Promise<void>((resolve, reject) => {
           deleteCast(
-            { hash, signer: userData?.signer_uuid ?? "" },
+            { hash, signer: signerUuid ?? "" },
             {
               onSuccess: () => {
                 successCount++;
+                // Immediately mark as deleted (optimistic update)
+                setDeletedCasts((prev) => new Set([...prev, hash]));
                 // Remove from selected casts
                 setSelectedCasts((prev) => prev.filter((h) => h !== hash));
                 // Remove from deleting state
@@ -170,8 +206,10 @@ const UserCast = ({ user }: { user: User }) => {
           successCount !== 1 ? "s" : ""
         }`
       );
-      // Refresh the list
-      refetch();
+      // Trigger refetch to sync with server
+      setTimeout(() => {
+        refetch();
+      }, 500);
     }
 
     if (failureCount > 0) {
@@ -179,10 +217,15 @@ const UserCast = ({ user }: { user: User }) => {
         `Failed to delete ${failureCount} cast${failureCount !== 1 ? "s" : ""}`
       );
     }
+
+    // Clear the castsToDelete array and reset states
+    setCastsToDelete([]);
+    setIsDeleting(false);
+    setShowDeleteConfirm(false);
   };
 
-  const isDeleting = Object.values(deletingCasts).some(Boolean);
-  const hasSelectedCasts = selectedCasts.length > 0;
+  const hasSelectedCasts =
+    selectedCasts.filter((hash) => !deletedCasts.has(hash)).length > 0;
 
   return (
     <section className="w-full max-w-2xl mx-auto px-6 pb-24">
@@ -252,7 +295,7 @@ const UserCast = ({ user }: { user: User }) => {
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
               <span className="text-xs font-medium text-gray-800">
-                {selectedCasts.length}
+                {selectedCasts.filter((hash) => !deletedCasts.has(hash)).length}
               </span>
             </div>
             <span className="text-sm font-medium text-gray-700">selected</span>
@@ -284,78 +327,88 @@ const UserCast = ({ user }: { user: User }) => {
         </div>
       ) : messages.length > 0 ? (
         <div className="space-y-4">
-          {paginatedMessages.map((msg) => (
-            <div
-              key={msg.hash}
-              className={`bg-white p-5 border rounded-2xl shadow-sm transition-all duration-200 ${
-                selectedCasts.includes(msg.hash)
-                  ? "border-gray-400 bg-gray-50 shadow-md"
-                  : "border-gray-100 hover:border-gray-200"
-              } ${deletingCasts[msg.hash] ? "opacity-50" : ""}`}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className={`flex-shrink-0 w-6 h-6 rounded-md border cursor-pointer transition-all flex items-center justify-center ${
-                    selectedCasts.includes(msg.hash)
-                      ? "bg-gray-800 border-gray-800"
-                      : "border-gray-300 hover:border-gray-400"
-                  }`}
-                  onClick={() =>
-                    !deletingCasts[msg.hash] && toggleSelection(msg.hash)
-                  }
-                >
-                  {selectedCasts.includes(msg.hash) && (
-                    <Check className="text-white w-4 h-4" />
-                  )}
-                </div>
+          {paginatedMessages.map((msg) => {
+            const isDeleted = deletedCasts.has(msg.hash);
+            const isCurrentlyDeleting = deletingCasts[msg.hash];
 
-                <div className="flex-1 min-w-0">
-                  <div className="mb-2">
-                    <p className="text-gray-800 text-base whitespace-pre-wrap leading-relaxed">
-                      {msg.data.castAddBody.text}
-                    </p>
+            // Don't render deleted casts
+            if (isDeleted) return null;
+
+            return (
+              <div
+                key={msg.hash}
+                className={`bg-white p-5 border rounded-2xl shadow-sm transition-all duration-200 ${
+                  selectedCasts.includes(msg.hash)
+                    ? "border-gray-400 bg-gray-50 shadow-md"
+                    : "border-gray-100 hover:border-gray-200"
+                } ${
+                  isCurrentlyDeleting ? "opacity-50 pointer-events-none" : ""
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`flex-shrink-0 w-6 h-6 rounded-md border cursor-pointer transition-all flex items-center justify-center ${
+                      selectedCasts.includes(msg.hash)
+                        ? "bg-gray-800 border-gray-800"
+                        : "border-gray-300 hover:border-gray-400"
+                    } ${isCurrentlyDeleting ? "cursor-not-allowed" : ""}`}
+                    onClick={() =>
+                      !isCurrentlyDeleting && toggleSelection(msg.hash)
+                    }
+                  >
+                    {selectedCasts.includes(msg.hash) && (
+                      <Check className="text-white w-4 h-4" />
+                    )}
                   </div>
 
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <time className="text-sm">
-                        {formatDateTime(msg.data.timestamp)}
-                      </time>
-                      
-
-                      {msg.data.castAddBody.parentCastId && (
-                        <div className="flex items-center ml-3 text-sm text-gray-500">
-                          <MessageSquare className="w-3.5 h-3.5 mr-1" />
-                          <span>
-                            Reply to FID {msg.data.castAddBody.parentCastId.fid}
-                          </span>
-                        </div>
-                      )}
+                  <div className="flex-1 min-w-0">
+                    <div className="mb-2">
+                      <p className="text-gray-800 text-base whitespace-pre-wrap leading-relaxed">
+                        {msg.data.castAddBody.text}
+                      </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      {deletingCasts[msg.hash] ? (
-                        <div className="p-1.5">
-                          <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => toggleSelection(msg.hash)}
-                          className={`p-1.5 rounded-full transition-colors ${
-                            selectedCasts.includes(msg.hash)
-                              ? "bg-gray-200 text-gray-700"
-                              : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                          }`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <time className="text-sm">
+                          {formatDateTime(msg.data.timestamp)}
+                        </time>
+
+                        {msg.data.castAddBody.parentCastId && (
+                          <div className="flex items-center ml-3 text-sm text-gray-500">
+                            <MessageSquare className="w-3.5 h-3.5 mr-1" />
+                            <span>
+                              Reply to FID{" "}
+                              {msg.data.castAddBody.parentCastId.fid}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {isCurrentlyDeleting ? (
+                          <div className="p-1.5">
+                            <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => toggleSelection(msg.hash)}
+                            className={`p-1.5 rounded-full transition-colors ${
+                              selectedCasts.includes(msg.hash)
+                                ? "bg-gray-200 text-gray-700"
+                                : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                            }`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
@@ -453,17 +506,24 @@ const UserCast = ({ user }: { user: User }) => {
       )}
 
       {/* Floating Delete Bar */}
-      {selectedCasts.length > 0 && (
+      {hasSelectedCasts && (
         <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-lg z-50 backdrop-blur-sm bg-white/95">
           <div className="max-w-2xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-800">
-                  {selectedCasts.length}
+                  {
+                    selectedCasts.filter((hash) => !deletedCasts.has(hash))
+                      .length
+                  }
                 </span>
               </div>
               <span className="text-sm font-medium text-gray-700">
-                {selectedCasts.length === 1 ? "cast" : "casts"} selected
+                {selectedCasts.filter((hash) => !deletedCasts.has(hash))
+                  .length === 1
+                  ? "cast"
+                  : "casts"}{" "}
+                selected
               </span>
             </div>
 
@@ -477,8 +537,8 @@ const UserCast = ({ user }: { user: User }) => {
               </button>
 
               <button
-                onClick={handleDelete}
-                disabled={isDeleting || selectedCasts.length === 0}
+                onClick={confirmDelete}
+                disabled={isDeleting || !hasSelectedCasts}
                 className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors disabled:opacity-70"
               >
                 {isDeleting ? (
@@ -490,8 +550,13 @@ const UserCast = ({ user }: { user: User }) => {
                   <>
                     <Trash2 className="w-4 h-4" />
                     Delete{" "}
-                    {selectedCasts.length > 1
-                      ? `(${selectedCasts.length})`
+                    {selectedCasts.filter((hash) => !deletedCasts.has(hash))
+                      .length > 1
+                      ? `(${
+                          selectedCasts.filter(
+                            (hash) => !deletedCasts.has(hash)
+                          ).length
+                        })`
                       : ""}
                   </>
                 )}
@@ -500,8 +565,23 @@ const UserCast = ({ user }: { user: User }) => {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <CustomDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => !isDeleting && setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete Casts"
+        description={`Are you sure you want to delete ${
+          castsToDelete.length === 1
+            ? "this cast"
+            : `these ${castsToDelete.length} casts`
+        }? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+        isLoading={isDeleting}
+      />
     </section>
   );
-};
-
-export default UserCast;
+}
