@@ -6,6 +6,7 @@ import UserHeader from "@/components/user-header";
 import UserCast from "@/components/user-cast";
 import QRCodeDisplay from "@/components/qr-code-display";
 import { User } from "lucide-react";
+import { Toaster } from "sonner";
 
 interface SignerData {
   signer_uuid: string;
@@ -23,17 +24,20 @@ interface UserData {
   following_count: number;
 }
 
+interface FarcasterUser {
+  username?: string;
+  displayName?: string;
+  fid: number;
+  [key: string]: any;
+}
+
 export default function Home() {
   const [isSDKReady, setIsSDKReady] = useState(false);
   const [isInMiniApp, setIsInMiniApp] = useState(false);
   const [isCheckingMiniApp, setIsCheckingMiniApp] = useState(true);
-  interface FarcasterUser {
-    username?: string;
-    displayName?: string;
-    fid: number;
-    [key: string]: any;
-  }
-  const [farcasterUser, setFarcasterUser] = useState<FarcasterUser | null>(null);
+  const [farcasterUser, setFarcasterUser] = useState<FarcasterUser | null>(
+    null
+  );
   const [signerData, setSignerData] = useState<SignerData | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isCreatingSigner, setIsCreatingSigner] = useState(false);
@@ -89,7 +93,6 @@ export default function Home() {
           setUserData(data.user);
           setSignerData(data.signer);
         } else {
-          // Signer exists but not approved, remove from storage
           localStorage.removeItem("signer_uuid");
         }
       } else {
@@ -120,10 +123,8 @@ export default function Home() {
 
       const data: SignerData = await response.json();
       setSignerData(data);
-console.log(data)
-      // Store signer UUID for later use
       localStorage.setItem("signer_uuid", data.signer_uuid);
-      console.log(data.signer_uuid)
+      console.log(data.signer_uuid);
     } catch (error) {
       console.error("Error creating signer:", error);
       setAuthError("Failed to create signer. Please try again.");
@@ -136,7 +137,9 @@ console.log(data)
     if (!signerData) return;
     try {
       const response = await fetch(
-        `/api/user?signer_uuid=${signerData.signer_uuid}&fid=${farcasterUser?.fid}`
+        `/api/user?signer_uuid=${signerData.signer_uuid}${
+          farcasterUser?.fid ? `&fid=${farcasterUser.fid}` : ""
+        }`
       );
       if (response.ok) {
         const data = await response.json();
@@ -149,9 +152,19 @@ console.log(data)
   };
 
   const handleSignOut = () => {
+    // Clear all user data from state
     localStorage.removeItem("signer_uuid");
+    sessionStorage.clear(); // Clear any session data
+
+    // Reset all state variables related to user
     setSignerData(null);
     setUserData(null);
+
+    // Clear any cached data
+    if (window.caches) {
+      // Optional: clear specific caches if needed
+      // This is advanced and might not be necessary in most cases
+    }
   };
 
   if (isCheckingMiniApp || (isInMiniApp && !isSDKReady)) {
@@ -179,7 +192,6 @@ console.log(data)
     );
   }
 
-  // Show authentication screen if no user data
   if (!userData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -211,7 +223,7 @@ console.log(data)
                 Creating Signer...
               </>
             ) : (
-              "Create Managed Signer"
+              "Sign in to farcaster"
             )}
           </button>
 
@@ -231,8 +243,8 @@ console.log(data)
 
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
             <p className="text-sm text-yellow-800">
-              💡 Managed signers allow the app to post on your behalf. The
-              signer creation is sponsored - you won't pay any fees!
+              💡 Managed signers allow the app to show your casts. The signer
+              creation is sponsored - you won't pay any fees!
             </p>
           </div>
         </div>

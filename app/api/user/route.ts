@@ -3,37 +3,89 @@ import { NextResponse } from "next/server"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
-  const fid = searchParams.get("fid")
+  const signerUuid = searchParams.get("signer_uuid")
 
-  if (!fid) {
-    return NextResponse.json({ error: "FID is required" }, { status: 400 })
+  if (!signerUuid) {
+    return NextResponse.json({ error: "Signer UUID is required" }, { status: 400 })
   }
+
   try {
-    // Fetch user casts from Neynar
-    const casts = await neynarClient.fetchCastsForUser({
-      fid: Number.parseInt(fid),
-      limit: 100, // Adjust as needed
+
+    const signer = await neynarClient.lookupSigner({ signerUuid })
+    console.log("Signer details:", signer)
+
+    if (signer.status !== "approved") {
+      return NextResponse.json(
+        {
+          error: "Signer not approved",
+          status: signer.status,
+          signer,
+        },
+        { status: 400 },
+      )
+    }
+
+    // Check if signer has FID
+    if (!signer.fid) {
+      console.error("Signer approved but no FID found:", signer)
+      return NextResponse.json(
+        {
+          error: "Signer approved but no FID associated",
+          signer,
+        },
+        { status: 400 },
+      )
+    }
+
+    console.log("Getting user info for FID:", signer.fid)
+
+    // Get user info using the correct method
+    const userResponse = await neynarClient.fetchBulkUsers({
+      fids: [signer.fid],
     })
 
-    // Transform the data to match the expected format
-    const messages = casts.casts.map((cast) => ({
-      hash: cast.hash,
-      data: {
-        timestamp: new Date(cast.timestamp).getTime(),
-        castAddBody: {
-          text: cast.text,
-          parentCastId: cast.parent_hash
-            ? {
-                fid: cast.parent_author?.fid || 0,
-              }
-            : undefined,
+    if (!userResponse.users || userResponse.users.length === 0) {
+      return NextResponse.json(
+        {
+          error: "User not found for FID",
+          fid: signer.fid,
         },
-      },
-    }))
+        { status: 404 },
+      )
+    }
 
-    return NextResponse.json({ messages }, { status: 200 })
+    const user = userResponse.users[0]
+    console.log("User response:", user)
+
+    return NextResponse.json(
+      {
+        user: user,
+        signer,
+        fid: signer.fid,
+      },
+      { status: 200 },
+    )
   } catch (error) {
-    console.error("Error fetching user casts:", error)
-    return NextResponse.json({ error: "Failed to fetch user casts" }, { status: 500 })
+    console.error("Error in user lookup:", error)
+
+    // More detailed error handling
+    if (error instanceof Error) {
+      return NextResponse.json(
+        {
+          error: "Lookup failed",
+          details: error.message,
+          signerUuid,
+        },
+        { status: 500 },
+      )
+    }
+
+    return NextResponse.json(
+      {
+        error: "An unknown error occurred",
+        signerUuid,
+      },
+      { status: 500 },
+    )
   }
 }

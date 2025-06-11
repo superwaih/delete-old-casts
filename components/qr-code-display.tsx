@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { ExternalLink, Copy, CheckCircle } from "lucide-react";
+import { Button } from "./button";
 
 interface QRCodeDisplayProps {
   approvalUrl: string;
@@ -18,23 +19,40 @@ export default function QRCodeDisplay({
   const [copied, setCopied] = useState(false);
   const [isPolling, setIsPolling] = useState(true);
 
+  // Poll for signer approval
   useEffect(() => {
     if (!isPolling) return;
 
     const pollInterval = setInterval(async () => {
       try {
+        console.log("Polling signer status for:", signerUuid);
+
         const response = await fetch(`/api/user?signer_uuid=${signerUuid}`);
+        const data = await response.json();
+
+        console.log("Poll response:", { status: response.status, data });
+
         if (response.ok) {
-          const data = await response.json();
           if (data.signer?.status === "approved") {
+            console.log("Signer approved! User data:", data.user);
             setIsPolling(false);
             onApproved();
+          }
+        } else {
+          // Log the error but continue polling unless it's a permanent error
+          console.log("Polling error (continuing):", data);
+
+          // If signer is not found, stop polling
+          if (response.status === 404) {
+            console.error("Signer not found, stopping poll");
+            setIsPolling(false);
           }
         }
       } catch (error) {
         console.error("Error polling signer status:", error);
+        // Continue polling on network errors
       }
-    }, 2000);
+    }, 3000); // Increased to 3 seconds to avoid rate limiting
 
     return () => clearInterval(pollInterval);
   }, [signerUuid, onApproved, isPolling]);
@@ -69,12 +87,20 @@ export default function QRCodeDisplay({
       </div>
 
       <div className="space-y-3">
-        <button onClick={openInWarpcast} className="w-full" >
+        <Button
+          onClick={openInWarpcast}
+          className="w-full cursor-pointer"
+          variant="outline"
+        >
           <ExternalLink className="w-4 h-4 mr-2" />
           Open in Warpcast
-        </button>
+        </Button>
 
-        <button onClick={copyToClipboard}  className="w-full">
+        <Button
+          onClick={copyToClipboard}
+          variant="outline"
+          className="w-full cursor-pointer"
+        >
           {copied ? (
             <>
               <CheckCircle className="w-4 h-4 mr-2" />
@@ -86,7 +112,7 @@ export default function QRCodeDisplay({
               Copy Link
             </>
           )}
-        </button>
+        </Button>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">

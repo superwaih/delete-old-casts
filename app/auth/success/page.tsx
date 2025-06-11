@@ -71,7 +71,7 @@ export default function AuthSuccessPage() {
         </h1>
 
         <p className="text-gray-600 mb-6">
-          Welcome, {user?.displayName || user?.username || "User"}! You're now
+          Welcome, {user?.display_name || user?.username || "User"}! You're now
           authenticated and ready to use Bulk Cast Manager.
         </p>
 
