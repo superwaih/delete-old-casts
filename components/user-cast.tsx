@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useDeleteCast, useFetchUserCast } from "@/services/neynar";
-import { useNeynarContext } from "@neynar/react";
+import { useFetchUserCast, useDeleteCast } from "@/services/neynar";
 import { toast } from "sonner";
 import {
   Check,
@@ -23,6 +22,11 @@ type User = {
   displayName?: string;
   pfpUrl?: string;
 } | null;
+
+interface UserCastProps {
+  user: User;
+  signerUuid?: string;
+}
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 15, 25];
 
@@ -50,9 +54,8 @@ const formatDateTime = (timestamp: number) => {
   });
 };
 
-const UserCast = ({ user }: { user: User }) => {
+export default function UserCast({ user, signerUuid }: UserCastProps) {
   const { data, isLoading, refetch } = useFetchUserCast(user?.fid ?? 0);
-  const { user: userData } = useNeynarContext();
   const [selectedCasts, setSelectedCasts] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -134,11 +137,12 @@ const UserCast = ({ user }: { user: User }) => {
       newDeletingState[hash] = true;
     });
     setDeletingCasts(newDeletingState);
+
     for (const hash of castsToDelete) {
       try {
         await new Promise<void>((resolve, reject) => {
           deleteCast(
-            { hash, signer: userData?.signer_uuid ?? "" },
+            { hash, signer: signerUuid ?? "" },
             {
               onSuccess: () => {
                 successCount++;
@@ -321,7 +325,6 @@ const UserCast = ({ user }: { user: User }) => {
                       <time className="text-sm">
                         {formatDateTime(msg.data.timestamp)}
                       </time>
-                      
 
                       {msg.data.castAddBody.parentCastId && (
                         <div className="flex items-center ml-3 text-sm text-gray-500">
@@ -502,6 +505,4 @@ const UserCast = ({ user }: { user: User }) => {
       )}
     </section>
   );
-};
-
-export default UserCast;
+}
