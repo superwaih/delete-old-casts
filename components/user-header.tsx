@@ -1,21 +1,33 @@
 "use client";
 
-import { useNeynarContext } from "@neynar/react";
+import { useNeynarContext, NeynarAuthButton } from "@neynar/react";
+import { User } from "lucide-react";
 
-type UserHeaderProps = {
-  user: {
-    fid: number;
-    username?: string;
-    displayName?: string;
-    pfp_url?: string;
-  };
-};
+export default function UserHeader() {
+  const { user, logoutUser, isAuthenticated } = useNeynarContext();
 
-export default function UserHeader({ user }: UserHeaderProps) {
-    const { logoutUser} = useNeynarContext(); // <-- add signOut
-  
+  if (!isAuthenticated || !user) {
+    return (
+      <header className="w-full p-3 my-6">
+        <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm rounded-3xl p-6 transition-all duration-300 hover:shadow-md hover:border-gray-300/50">
+          <div className="flex items-center justify-center gap-4">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-900 rounded-2xl">
+              <User className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-center">
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                Please sign in to continue
+              </h2>
+              <NeynarAuthButton className="bg-gray-700 p-3 cursor-pointer rounded-md flex items-center text-white hover:bg-gray-800 transition-colors" />
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
-    <header className="w-full p-3  m my-6">
+    <header className="w-full p-3 my-6">
       <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm rounded-3xl p-6 transition-all duration-300 hover:shadow-md hover:border-gray-300/50">
         <div className="flex items-center gap-5">
           {/* Profile Picture */}
@@ -29,7 +41,7 @@ export default function UserHeader({ user }: UserHeaderProps) {
             ) : (
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-sm">
                 <span className="text-2xl font-semibold text-gray-500">
-                  {(user.displayName || user.username || "U")
+                  {(user?.display_name || user?.username || "U")
                     .charAt(0)
                     .toUpperCase()}
                 </span>
@@ -42,9 +54,9 @@ export default function UserHeader({ user }: UserHeaderProps) {
           <div className="flex-1 min-w-0">
             <div className="mb-3">
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-tight">
-                {user.displayName || user.username || "User"}
+                {user?.display_name || user.username || "User"}
               </h1>
-              {user.displayName && user.username && (
+              {user.display_name && user.username && (
                 <p className="text-sm text-gray-500 font-medium mt-1">
                   @{user.username}
                 </p>
@@ -63,12 +75,12 @@ export default function UserHeader({ user }: UserHeaderProps) {
               </span>
             </div>
           </div>
-           <button
-          onClick={logoutUser}
-          className="ml-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-        >
-          Sign Out
-        </button>
+          <button
+            onClick={logoutUser}
+            className="ml-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
     </header>
