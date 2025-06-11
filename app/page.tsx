@@ -142,7 +142,7 @@ export default function Home() {
           </p>
           <div className="flex justify-center">
             <NeynarAuthButton
-              variant={SIWN_variant.NEYNAR}
+              // variant={SIWN_variant.NEYNAR}
               className="bg-gray-700 p-4 cursor-pointer rounded-md flex items-center text-white"
             />
           </div>
