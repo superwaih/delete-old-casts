@@ -19,7 +19,6 @@ export default function AuthPopup({
 
   useEffect(() => {
     if (isOpen) {
-      // Prevent body scroll when popup is open
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";

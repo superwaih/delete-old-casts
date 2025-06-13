@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@farcaster/auth-kit": "^0.8.1",
     "@farcaster/frame-sdk": "^0.0.54",
     "@farcaster/frame-wagmi-connector": "^0.0.43",
     "@farcaster/hub-nodejs": "^0.14.0",

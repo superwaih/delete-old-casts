@@ -2,26 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { sdk } from "@farcaster/frame-sdk";
+import { getCurrentSigner, signOut } from "@/lib/authkit";
 import UserHeader from "@/components/user-header";
 import UserCast from "@/components/user-cast";
-import QRCodeDisplay from "@/components/qr-code-display";
-import { User } from "lucide-react";
+import AuthButton from "@/components/auth-button";
+import { User, AlertCircle } from "lucide-react";
 import { Toaster } from "sonner";
 
-interface SignerData {
-  signer_uuid: string;
-  public_key: string;
-  status: string;
-  signer_approval_url: string;
-}
-
 interface UserData {
+  signerUuid: string;
   fid: number;
   username: string;
-  display_name: string;
-  pfp_url: string;
-  follower_count: number;
-  following_count: number;
+  displayName: string;
+  pfpUrl: string;
 }
 
 interface FarcasterUser {
@@ -38,10 +31,9 @@ export default function Home() {
   const [farcasterUser, setFarcasterUser] = useState<FarcasterUser | null>(
     null
   );
-  const [signerData, setSignerData] = useState<SignerData | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [isCreatingSigner, setIsCreatingSigner] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkMiniAppAndInitializeSDK = async () => {
@@ -76,118 +68,102 @@ export default function Home() {
     checkMiniAppAndInitializeSDK();
   }, []);
 
-  // Check for existing signer in localStorage
+  // Check for existing authentication
   useEffect(() => {
-    const storedSignerUuid = localStorage.getItem("signer_uuid");
-    if (storedSignerUuid) {
-      checkSignerStatus(storedSignerUuid);
-    }
+    const checkAuthStatus = async () => {
+      try {
+        const currentSigner = await getCurrentSigner();
+        if (currentSigner && currentSigner.signerUuid) {
+          setUserData({
+            signerUuid: currentSigner.signerUuid,
+            fid: currentSigner.fid,
+            username: currentSigner.username || "",
+            displayName: currentSigner.displayName || "",
+            pfpUrl: currentSigner.pfpUrl || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error checking auth status:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthStatus();
   }, []);
 
-  const checkSignerStatus = async (signerUuid: string) => {
-    try {
-      const response = await fetch(`/api/user?signer_uuid=${signerUuid}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.signer?.status === "approved") {
-          setUserData(data.user);
-          setSignerData(data.signer);
+  // Listen for AuthKit state changes in localStorage
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "fc_auth_kit") {
+        if (e.newValue) {
+          try {
+            const parsedState = JSON.parse(e.newValue);
+            if (
+              parsedState?.status === "authenticated" &&
+              parsedState?.session
+            ) {
+              const { message, signer } = parsedState.session;
+              if (signer?.signerUuid) {
+                setUserData({
+                  signerUuid: signer.signerUuid,
+                  fid: message.fid,
+                  username: message.username || "",
+                  displayName: message.displayName || "",
+                  pfpUrl: message.pfpUrl || "",
+                });
+              }
+            } else if (parsedState?.status === "error") {
+              setAuthError("Authentication failed");
+            }
+          } catch (error) {
+            console.error("Error parsing auth state:", error);
+          }
         } else {
-          localStorage.removeItem("signer_uuid");
+          // Auth state cleared
+          setUserData(null);
         }
-      } else {
-        // Signer doesn't exist, remove from storage
-        localStorage.removeItem("signer_uuid");
       }
-    } catch (error) {
-      console.error("Error checking signer status:", error);
-      localStorage.removeItem("signer_uuid");
-    }
-  };
+    };
 
-  const createSigner = async () => {
-    setIsCreatingSigner(true);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const handleAuthSuccess = (data: UserData) => {
+    setUserData(data);
     setAuthError(null);
+  };
 
+  const handleAuthError = (error: Error) => {
+    console.error("Authentication error:", error);
+    setAuthError(error.message || "Failed to authenticate. Please try again.");
+  };
+
+  const handleSignOut = async () => {
     try {
-      const response = await fetch("/api/signer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create signer");
-      }
-
-      const data: SignerData = await response.json();
-      setSignerData(data);
-      localStorage.setItem("signer_uuid", data.signer_uuid);
-      console.log(data.signer_uuid);
+      await signOut();
+      setUserData(null);
+      // Force reload to clear AuthKit state completely
+      window.location.reload();
     } catch (error) {
-      console.error("Error creating signer:", error);
-      setAuthError("Failed to create signer. Please try again.");
-    } finally {
-      setIsCreatingSigner(false);
+      console.error("Error signing out:", error);
     }
   };
 
-  const handleSignerApproved = async () => {
-    if (!signerData) return;
-    try {
-      const response = await fetch(
-        `/api/user?signer_uuid=${signerData.signer_uuid}${
-          farcasterUser?.fid ? `&fid=${farcasterUser.fid}` : ""
-        }`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(data.user);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      setAuthError("Failed to fetch user data after approval.");
-    }
-  };
-
-  const handleSignOut = () => {
-    // Clear all user data from state
-    localStorage.removeItem("signer_uuid");
-    sessionStorage.clear(); // Clear any session data
-
-    // Reset all state variables related to user
-    setSignerData(null);
-    setUserData(null);
-
-    // Clear any cached data
-    if (window.caches) {
-      // Optional: clear specific caches if needed
-      // This is advanced and might not be necessary in most cases
-    }
-  };
-
-  if (isCheckingMiniApp || (isInMiniApp && !isSDKReady)) {
+  if (isCheckingMiniApp || (isInMiniApp && !isSDKReady) || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full mx-auto mb-4"></div>
           <p className="text-lg text-gray-700">
-            {isCheckingMiniApp ? "Loading..." : "Initializing Farcaster SDK..."}
+            {isCheckingMiniApp
+              ? "Loading..."
+              : isLoading
+              ? "Checking authentication..."
+              : "Initializing Farcaster SDK..."}
           </p>
         </div>
-      </div>
-    );
-  }
-
-  if (signerData && !userData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <QRCodeDisplay
-          approvalUrl={signerData.signer_approval_url}
-          onApproved={handleSignerApproved}
-          signerUuid={signerData.signer_uuid}
-        />
       </div>
     );
   }
@@ -203,29 +179,24 @@ export default function Home() {
             Welcome to Bulk Cast Manager
           </h1>
           <p className="text-gray-600 mb-8">
-            Create a managed signer to interact with Farcaster
+            Sign in with Farcaster to manage your casts
           </p>
 
           {authError && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-red-800">{authError}</p>
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="text-left">
+                  <p className="text-sm font-medium text-red-800 mb-1">
+                    Authentication Error
+                  </p>
+                  <p className="text-sm text-red-700">{authError}</p>
+                </div>
+              </div>
             </div>
           )}
 
-          <button
-            onClick={createSigner}
-            disabled={isCreatingSigner}
-            className="bg-gray-700 p-4 cursor-pointer rounded-md flex items-center text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full justify-center"
-          >
-            {isCreatingSigner ? (
-              <>
-                <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                Creating Signer...
-              </>
-            ) : (
-              "Sign in to farcaster"
-            )}
-          </button>
+          <AuthButton onSuccess={handleAuthSuccess} onError={handleAuthError} />
 
           {isInMiniApp && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
@@ -243,8 +214,8 @@ export default function Home() {
 
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
             <p className="text-sm text-yellow-800">
-              💡 Managed signers allow the app to show your casts. The signer
-              creation is sponsored - you won't pay any fees!
+              💡 Sign in with Farcaster to view and manage your casts. No
+              additional permissions needed!
             </p>
           </div>
         </div>
@@ -254,12 +225,30 @@ export default function Home() {
 
   return (
     <div className="min-h-screen w-full bg-gray-50">
+      <Toaster position="top-center" />
       <div className="sticky top-0 z-40 bg-gray-50/80 backdrop-blur-sm border-b border-gray-200/50">
-        <UserHeader user={userData} onSignOut={handleSignOut} />
+        <UserHeader
+          user={{
+            username: userData.username,
+            display_name: userData.displayName,
+            pfp_url: userData.pfpUrl,
+            follower_count: 0, // You would need to fetch this separately
+            following_count: 0, // You would need to fetch this separately
+          }}
+          onSignOut={handleSignOut}
+        />
       </div>
 
       <div className="pb-6">
-        <UserCast user={userData} signerUuid={signerData?.signer_uuid} />
+        <UserCast
+          user={{
+            fid: userData.fid,
+            username: userData.username,
+            display_name: userData.displayName,
+            pfp_url: userData.pfpUrl,
+          }}
+          signerUuid={userData.signerUuid}
+        />
       </div>
     </div>
   );

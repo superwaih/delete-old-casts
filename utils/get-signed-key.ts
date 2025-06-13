@@ -6,7 +6,7 @@ import { getFid } from "./get-fid";
 import neynarClient from "@/lib/neynar-client";
 const options = {
     sponsor: {
-       sponsored_by_neynar: true
+       sponsored_by_neynar: false
    }};
 
 export const getSignedKey = async () => {
@@ -29,7 +29,7 @@ console.log("Farcaster Developer FID:", fid);
     appFid: fid,
     deadline,
     signature,
-    sponsor: options.sponsor,
+    // sponsor: options.sponsor,
   });
 
   return signedKey;

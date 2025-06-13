@@ -30,7 +30,7 @@ interface UserCastProps {
   signerUuid?: string;
 }
 
-const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 15, 25];
+const ITEMS_PER_PAGE_OPTIONS = [5, 8, 10, 12, 15];
 
 const formatDateTime = (timestamp: number) => {
   let date = new Date(timestamp);
