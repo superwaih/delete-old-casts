@@ -6,7 +6,6 @@ import UserHeader from "@/components/user-header";
 import UserCast from "@/components/user-cast";
 import QRCodeDisplay from "@/components/qr-code-display";
 import { User } from "lucide-react";
-import { Toaster } from "sonner";
 
 interface SignerData {
   signer_uuid: string;

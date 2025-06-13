@@ -6,7 +6,7 @@ import { getFid } from "./get-fid";
 import neynarClient from "@/lib/neynar-client";
 const options = {
     sponsor: {
-       sponsored_by_neynar: true
+       sponsored_by_neynar: false
    }};
 
 export const getSignedKey = async () => {
