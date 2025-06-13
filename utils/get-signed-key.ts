@@ -29,7 +29,7 @@ console.log("Farcaster Developer FID:", fid);
     appFid: fid,
     deadline,
     signature,
-    sponsor: options.sponsor,
+    // sponsor: options.sponsor,
   });
 
   return signedKey;
